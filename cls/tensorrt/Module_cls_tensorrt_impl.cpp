@@ -134,6 +134,34 @@ namespace tensorrt_cls
                 AIWORKS_ASSERT(0);
             }
 
+#if NV_TENSORRT_MAJOR >= 8
+            // CUDA stream used for profiling by the builder.
+            auto profileStream = samplesCommon::makeCudaStream();
+            if (!profileStream)
+            {
+                AIWORKS_ASSERT(0);
+            }
+            config_trt_->setProfileStream(*profileStream);
+
+            TRTUniquePtr<nvinfer1::IHostMemory> plan{builder_->buildSerializedNetwork(*network_, *config_trt_)};
+            if (!plan)
+            {
+                AIWORKS_ASSERT(0);
+            }
+
+            runtime_ = TRTUniquePtr<nvinfer1::IRuntime>(nvinfer1::createInferRuntime(sample::gLogger.getTRTLogger()));
+            if (!runtime_)
+            {
+                AIWORKS_ASSERT(0);
+            }
+
+            net_ = std::shared_ptr<nvinfer1::ICudaEngine>(
+                    runtime_->deserializeCudaEngine(plan->data(), plan->size()), samplesCommon::InferDeleter());
+            if (!net_)
+            {
+                AIWORKS_ASSERT(0);
+            }
+#else
             net_ = std::shared_ptr<nvinfer1::ICudaEngine>(
                     builder_->buildEngineWithConfig(*network_, *config_trt_), samplesCommon::InferDeleter());
 
@@ -141,7 +169,7 @@ namespace tensorrt_cls
             {
                 AIWORKS_ASSERT(0);
             }
-
+#endif
             // serialize() to disk for fast loader later
             if (!fs::exists(engine_file_path))
             {
