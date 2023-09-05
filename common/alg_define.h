@@ -111,61 +111,61 @@ static void cudaFastFree(void* devPtr, size_t device_id)
 /**************************************************************/
 
 #if defined(__APPLE__)
-    #include <TargetConditionals.h>
+#include <TargetConditionals.h>
     #if TARGET_OS_IPHONE
-        #define AIWORKS_BUILD_FOR_IOS
+        #define AIALG_BUILD_FOR_IOS
     #endif
 #endif
 
 #if defined(__aarch64__) || defined(__arm__)
-    #include <android/log.h>
-    #define AIWORKS_ERROR(format, ...) __android_log_print(ANDROID_LOG_ERROR, "MNNJNI", format, ##__VA_ARGS__)
-    #define AIWORKS_PRINT(format, ...) __android_log_print(ANDROID_LOG_INFO, "MNNJNI", format, ##__VA_ARGS__)
+#include <android/log.h>
+    #define AIALG_ERROR(format, ...) __android_log_print(ANDROID_LOG_ERROR, "MNNJNI", format, ##__VA_ARGS__)
+    #define AIALG_PRINT(format, ...) __android_log_print(ANDROID_LOG_INFO, "MNNJNI", format, ##__VA_ARGS__)
 #else
-    #define AIWORKS_PRINT(format, ...) printf("%d, %s:", __LINE__, __FUNCTION__); \
+#define AIALG_PRINT(format, ...) printf("%s:%d, %s:", __FILE__, __LINE__, __FUNCTION__); \
                                         printf(format, ##__VA_ARGS__)
-    #define AIWORKS_ERROR(format, ...) printf("%d, %s:", __LINE__, __FUNCTION__); \
+#define AIALG_ERROR(format, ...) printf("%s:%d, %s:", __FILE__, __LINE__, __FUNCTION__); \
                                         printf(format, ##__VA_ARGS__)
 #endif
 
 #ifdef DEBUG
-#define AIWORKS_ASSERT(x)                                            \
+#define AIALG_ASSERT(x)                                            \
     {                                                            \
         int res = (x);                                           \
         if (!res) {                                              \
-            AIWORKS_ERROR("Error for %s, %d\n", __FILE__, __LINE__); \
+            AIALG_ERROR("Error for %s, %d\n", __FILE__, __LINE__); \
             assert(res);                                         \
         }                                                        \
     }
 #else
-#define AIWORKS_ASSERT(x)                                            \
+#define AIALG_ASSERT(x)                                            \
     {                                                            \
         int res = (x);                                           \
         if (!res) {                                              \
-            AIWORKS_ERROR("Error for %d\n", __LINE__); \
+            AIALG_ERROR("Error for %d\n", __LINE__); \
         }                                                        \
     }
 #endif
 
-#define AIWORKS_FUNC_PRINT(x) AIWORKS_PRINT(#x "=%d in %s, %d \n", x, __func__, __LINE__);
-#define AIWORKS_FUNC_PRINT_ALL(x, type) AIWORKS_PRINT(#x "=" #type " %" #type " in %s, %d \n", x, __func__, __LINE__);
+#define AIALG_FUNC_PRINT(x) AIALG_PRINT(#x "=%d in %s, %d \n", x, __func__, __LINE__);
+#define AIALG_FUNC_PRINT_ALL(x, type) AIALG_PRINT(#x "=" #type " %" #type " in %s, %d \n", x, __func__, __LINE__);
 
-#define AIWORKS_CHECK(success, log) \
+#define AIALG_CHECK(success, log) \
 if(!(success)){ \
-AIWORKS_ERROR("Check failed: %s ==> %s\n", #success, #log); \
+AIALG_ERROR("Check failed: %s ==> %s\n", #success, #log); \
 }
 
 
 #if defined(_MSC_VER)
-    #if defined(BUILDING_AIWORKS_DLL)
-        #define AIWORKS_PUBLIC __declspec(dllexport)
-    #elif defined(USING_AIWORKS_DLL)
-        #define AIWORKS_PUBLIC __declspec(dllimport)
+#if defined(BUILDING_AIALG_DLL)
+        #define AIALG_PUBLIC __declspec(dllexport)
+    #elif defined(USING_AIALG_DLL)
+        #define AIALG_PUBLIC __declspec(dllimport)
     #else
-        #define AIWORKS_PUBLIC
+        #define AIALG_PUBLIC
     #endif
 #else
-    #define AIWORKS_PUBLIC __attribute__((visibility("default")))
+#define AIALG_PUBLIC __attribute__((visibility("default")))
 #endif
 
 #define ALG_ENGINE_IMPL(alg, lower_name)  \

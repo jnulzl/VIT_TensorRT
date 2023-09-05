@@ -49,7 +49,7 @@ namespace tensorrt_cls
         cudaFastFree(coeffs_d_, config_.device_id);
         cudaFastFree(pBatchList_d_, config_.device_id);
 #ifdef AI_ALG_DEBUG
-        std::printf("%d, CModule_cls_tensorrt_impl::engine_deinit\n", __LINE__);
+        AIALG_PRINT("%d, CModule_cls_tensorrt_impl::engine_deinit\n", __LINE__);
 #endif
     }
 
@@ -103,7 +103,7 @@ namespace tensorrt_cls
             builder_ = TRTUniquePtr<nvinfer1::IBuilder>(nvinfer1::createInferBuilder(sample::gLogger.getTRTLogger()));
             if (!builder_)
             {
-                AIWORKS_ASSERT(0);
+                AIALG_ASSERT(0);
             }
 
             const auto explicitBatch =
@@ -111,13 +111,13 @@ namespace tensorrt_cls
             network_ = TRTUniquePtr<nvinfer1::INetworkDefinition>(builder_->createNetworkV2(explicitBatch));
             if (!network_)
             {
-                AIWORKS_ASSERT(0);
+                AIALG_ASSERT(0);
             }
 
             config_trt_ = TRTUniquePtr<nvinfer1::IBuilderConfig>(builder_->createBuilderConfig());
             if (!config_trt_)
             {
-                AIWORKS_ASSERT(0);
+                AIALG_ASSERT(0);
             }
 
             parser_ = TRTUniquePtr<nvonnxparser::IParser>(
@@ -125,13 +125,13 @@ namespace tensorrt_cls
 
             if (!parser_)
             {
-                AIWORKS_ASSERT(0);
+                AIALG_ASSERT(0);
             }
 
             auto constructed = constructNetwork(builder_, network_, config_trt_, parser_);
             if (!constructed)
             {
-                AIWORKS_ASSERT(0);
+                AIALG_ASSERT(0);
             }
 
 #if NV_TENSORRT_MAJOR >= 8
@@ -139,27 +139,27 @@ namespace tensorrt_cls
             auto profileStream = samplesCommon::makeCudaStream();
             if (!profileStream)
             {
-                AIWORKS_ASSERT(0);
+                AIALG_ASSERT(0);
             }
             config_trt_->setProfileStream(*profileStream);
 
             TRTUniquePtr<nvinfer1::IHostMemory> plan{builder_->buildSerializedNetwork(*network_, *config_trt_)};
             if (!plan)
             {
-                AIWORKS_ASSERT(0);
+                AIALG_ASSERT(0);
             }
 
             runtime_ = TRTUniquePtr<nvinfer1::IRuntime>(nvinfer1::createInferRuntime(sample::gLogger.getTRTLogger()));
             if (!runtime_)
             {
-                AIWORKS_ASSERT(0);
+                AIALG_ASSERT(0);
             }
 
             net_ = std::shared_ptr<nvinfer1::ICudaEngine>(
                     runtime_->deserializeCudaEngine(plan->data(), plan->size()), samplesCommon::InferDeleter());
             if (!net_)
             {
-                AIWORKS_ASSERT(0);
+                AIALG_ASSERT(0);
             }
 #else
             net_ = std::shared_ptr<nvinfer1::ICudaEngine>(
@@ -167,7 +167,7 @@ namespace tensorrt_cls
 
             if (!net_)
             {
-                AIWORKS_ASSERT(0);
+                AIALG_ASSERT(0);
             }
 #endif
             // serialize() to disk for fast loader later
@@ -207,7 +207,7 @@ namespace tensorrt_cls
         context_ = TRTUniquePtr<nvinfer1::IExecutionContext>(net_->createExecutionContext());
         if (!context_)
         {
-            AIWORKS_ASSERT(0);
+            AIALG_ASSERT(0);
         }
 
         // For gpu preprocess
@@ -217,21 +217,21 @@ namespace tensorrt_cls
                                                               config_.device_id));
         if (!dst_ptr_d_)
         {
-            AIWORKS_ASSERT(0);
+            AIALG_ASSERT(0);
         }
 
         dst_float_ptr_d_ = reinterpret_cast<Npp32f *>(cudaFastMalloc(
                 sizeof(Npp32f) * dst_pixel_num_ * config_.batch_size, config_.device_id));
         if (!dst_float_ptr_d_)
         {
-            AIWORKS_ASSERT(0);
+            AIALG_ASSERT(0);
         }
 
         dst_chw_float_ptr_d_ = reinterpret_cast<Npp32f *>(cudaFastMalloc(
                 sizeof(Npp32f) * dst_pixel_num_ * config_.batch_size, config_.device_id));
         if (!dst_chw_float_ptr_d_)
         {
-            AIWORKS_ASSERT(0);
+            AIALG_ASSERT(0);
         }
 
         // For batch gpu preprocess
@@ -241,13 +241,13 @@ namespace tensorrt_cls
                                                               config_.device_id));
         if (!coeffs_d_)
         {
-            AIWORKS_ASSERT(0);
+            AIALG_ASSERT(0);
         }
         pBatchList_d_ = reinterpret_cast<NppiWarpAffineBatchCXR *>(cudaFastMalloc(
                 sizeof(NppiWarpAffineBatchCXR) * config_.batch_size, config_.device_id));
         if (!pBatchList_d_)
         {
-            AIWORKS_ASSERT(0);
+            AIALG_ASSERT(0);
         }
         pBatchList_.resize(config_.batch_size);
     }
@@ -452,12 +452,12 @@ namespace tensorrt_cls
         bool status = context_->executeV2(buffers_->getDeviceBindings().data());
         if (!status)
         {
-            AIWORKS_ERROR("Error %d line in file %s", __LINE__, __FILE__);
+            AIALG_ERROR("Error %d line in file %s", __LINE__, __FILE__);
         }
 
 #ifdef AI_ALG_DEBUG
         std::chrono::time_point<std::chrono::system_clock> end_time = std::chrono::system_clock::now();
-        std::printf("TensorRT inference time %ld us\n",
+        AIALG_PRINT("TensorRT inference time %ld us\n",
                     std::chrono::duration_cast<std::chrono::microseconds>(end_time - begin_time).count());
         begin_time = std::chrono::system_clock::now();
 #endif
@@ -501,7 +501,7 @@ namespace tensorrt_cls
         }
 #ifdef AI_ALG_DEBUG
         end_time = std::chrono::system_clock::now();
-        std::printf("postprocess time %ld us\n",
+        AIALG_PRINT("postprocess time %ld us\n",
                     std::chrono::duration_cast<std::chrono::microseconds>(end_time - begin_time).count());
 #endif
     }

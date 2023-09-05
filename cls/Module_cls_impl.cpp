@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include "Module_cls_impl.h"
+#include "alg_define.h"
 #include "debug.h"
 
 static void softmax(float* vec, size_t len)
@@ -33,7 +34,7 @@ namespace tensorrt_cls
     {
         engine_deinit();
 #ifdef AI_ALG_DEBUG
-        std::printf("%d, CModule_cls_impl::deinit\n", __LINE__);
+        AIALG_PRINT("release success!\n");
 #endif
     }
 
@@ -68,7 +69,7 @@ namespace tensorrt_cls
 
 #ifdef AI_ALG_DEBUG
         std::chrono::time_point<std::chrono::system_clock> end_time = std::chrono::system_clock::now();
-        std::printf("Preprocess time %ld us\n",
+        AIALG_PRINT("Preprocess time %ld us\n",
                     std::chrono::duration_cast<std::chrono::microseconds>(end_time - begin_time).count());
 #endif
 
@@ -76,7 +77,7 @@ namespace tensorrt_cls
 
 #ifdef AI_ALG_DEBUG
         std::chrono::time_point<std::chrono::system_clock> end_time_run = std::chrono::system_clock::now();
-        std::printf("Inference time %ld us\n",
+        AIALG_PRINT("Inference time %ld us\n",
                     std::chrono::duration_cast<std::chrono::microseconds>(end_time_run - end_time).count());
 #endif
 
@@ -84,7 +85,7 @@ namespace tensorrt_cls
 
 #ifdef AI_ALG_DEBUG
         std::chrono::time_point<std::chrono::system_clock> end_time_post = std::chrono::system_clock::now();
-        std::printf("Postprocess time %ld us\n",
+        AIALG_PRINT("Postprocess time %ld us\n",
                     std::chrono::duration_cast<std::chrono::microseconds>(end_time_post - end_time_run).count());
 #endif
     }

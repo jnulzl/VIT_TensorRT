@@ -27,7 +27,7 @@ struct BaseConfig
     int device_id = 0;
 #ifdef USE_TENSORRT
     int dlaCore = -1;
-    bool fp16 = false;
+    bool fp16 = true;
     bool int8 = false;
 #endif
 #endif

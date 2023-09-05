@@ -8,7 +8,7 @@
 
 namespace tensorrt_cls
 {
-    class AIWORKS_PUBLIC CModule_cls
+    class AIALG_PUBLIC CModule_cls
     {
     public:
         CModule_cls();
