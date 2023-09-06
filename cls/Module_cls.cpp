@@ -8,7 +8,10 @@ namespace tensorrt_cls
 {
     CModule_cls::~CModule_cls()
     {
-
+        if(ANY_POINTER_CAST(impl_, CModule_cls_impl))
+        {
+            delete ANY_POINTER_CAST(impl_, CModule_cls_impl);
+        }
     }
 
     void CModule_cls::init(const BaseConfig &config)
@@ -19,7 +22,6 @@ namespace tensorrt_cls
     void CModule_cls::deinit()
     {
         ANY_POINTER_CAST(impl_, CModule_cls_impl)->deinit();
-        delete ANY_POINTER_CAST(impl_, CModule_cls_impl);
 #if defined(ALG_DEBUG) || defined(AI_ALG_DEBUG)
         AIALG_PRINT("release success!\n");
 #endif
