@@ -20,7 +20,7 @@ else()
     add_library(${CLS_LIB_NAME} STATIC ${src_all})
 endif ()
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -fvisibility-inlines-hidden")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s -fvisibility=hidden -fvisibility-inlines-hidden")
 set_target_properties(${CLS_LIB_NAME} PROPERTIES  CUDA_SEPARABLE_COMPILATION ON)
 
 target_include_directories(${CLS_LIB_NAME} PRIVATE
