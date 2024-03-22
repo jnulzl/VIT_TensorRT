@@ -1,4 +1,4 @@
-set(demo_src demo_batch_cls_opencv_cuda.cpp)
+set(demo_src zhedang.cpp)
 get_filename_component(exe_name ${demo_src} NAME_WLE)
 add_executable(${exe_name} ${demo_src})
 
