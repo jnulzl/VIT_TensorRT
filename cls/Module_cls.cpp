@@ -1,5 +1,6 @@
 #include "Module_cls_impl.h"
 #include "Module_cls.h"
+#include "ai_alg_version.h"
 
 #include "alg_define.h"
 #include "debug.h"
@@ -16,6 +17,7 @@ namespace tensorrt_cls
 
     void CModule_cls::init(const BaseConfig &config)
     {
+        print_version();
         ANY_POINTER_CAST(impl_, CModule_cls_impl)->init(config);
     }
 

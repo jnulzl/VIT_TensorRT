@@ -126,3 +126,9 @@ link_directories(${LIB_PATH})
 set(CLS_LIB_NAME cls_tensorrt)
 add_subdirectory(cls)
 add_subdirectory(examples)
+
+set(ALG_LIB_NAME ${CLS_LIB_NAME})
+configure_file (
+        ${PROJECT_SOURCE_DIR}/cls/ai_alg_version.h.in
+        ${PROJECT_SOURCE_DIR}/cls/ai_alg_version.h
+)

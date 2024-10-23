@@ -9,3 +9,5 @@ build*
 cmake-build*
 tensorrt_int8_demo/npp_demo.cpp
 third_party/*
+
+*/ai_alg_version.h

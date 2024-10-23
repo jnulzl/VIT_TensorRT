@@ -1,0 +1,23 @@
+//
+// Created by Li Zhaoliang on 2024/10/23.
+//
+
+#ifndef AI_ALG_VERSION_H
+#define AI_ALG_VERSION_H
+
+#include <cstdio>
+
+#define COMPILE_TIME "@COMPILE_TIME@"
+#define ALG_LIB_NAME "@ALG_LIB_NAME@"
+#define GIT_BRANCH "@GIT_BRANCH@"
+#define GIT_HASH "@GIT_HASH@"
+
+static inline void print_version()
+{
+    printf("Compile time: %s\n", COMPILE_TIME);
+    printf("Alg lib name: %s\n", ALG_LIB_NAME);
+    printf("Git branch: %s\n", GIT_BRANCH);
+    printf("Git hash: %s\n", GIT_HASH);
+}
+
+#endif //AI_ALG_VERSION_H
