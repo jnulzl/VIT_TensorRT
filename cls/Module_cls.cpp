@@ -34,9 +34,13 @@ namespace tensorrt_cls
         ANY_POINTER_CAST(impl_, CModule_cls_impl)->process_batch(imageInfos, batch_size);
     }
 
-    const ClsInfo *CModule_cls::get_result()
+    const ClsInfo* CModule_cls::get_result()
     {
         return ANY_POINTER_CAST(impl_, CModule_cls_impl)->get_result();
     }
 
+    const BaseConfig* CModule_cls::get_config() const
+    {
+        return ANY_POINTER_CAST(impl_, CModule_cls_impl)->get_config();
+    }
 }

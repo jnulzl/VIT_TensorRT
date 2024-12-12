@@ -23,6 +23,8 @@ namespace tensorrt_cls
 
         const ClsInfo *get_result();
 
+        const BaseConfig* get_config() const;
+
     private:
         AW_ANY_POINTER impl_;
     };

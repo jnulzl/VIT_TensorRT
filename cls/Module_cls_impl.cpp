@@ -117,4 +117,9 @@ namespace tensorrt_cls
     {
         return cls_batch_.data();
     }
+
+    const BaseConfig* CModule_cls_impl::get_config() const
+    {
+        return &config_;;
+    }
 }

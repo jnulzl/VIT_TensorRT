@@ -21,7 +21,9 @@ namespace tensorrt_cls
 
         void process_batch(const ImageInfoUint8 *imageInfos, int batch_size);
 
-        const ClsInfo *get_result();
+        const ClsInfo* get_result();
+
+        const BaseConfig* get_config() const;
 
     protected:
         virtual void pre_batch_process(const ImageInfoUint8 *imageInfos, int batch_size);
