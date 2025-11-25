@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(ClsTensorRT CUDA CXX C)
+project(VITTensorRT CUDA CXX C)
 
 set(CMAKE_SYSTEM_NAME "Linux") # Linux Android
 set(CMAKE_CXX_STANDARD 14)
@@ -70,11 +70,13 @@ if("Linux" STREQUAL ${CMAKE_SYSTEM_NAME})
     endif()
     message(STATUS "TRT_HOME :  " ${TRT_HOME})
 
-    set(TRT_SAMPLES_COMMON_HOME ${TRT_HOME}/samples/common)
+    set(TRT_SAMPLES_HOME ${TRT_HOME}/samples)
+    set(TRT_SAMPLES_COMMON_HOME ${TRT_SAMPLES_HOME}/common)
 
     ##############TensorRT##############
     set(TENSORRT_INCLUDE
             ${TRT_SAMPLES_COMMON_HOME}
+            ${TRT_SAMPLES_HOME}
             ${TRT_HOME}/include
             ${CUDA_HOME}/include
             ${CUDNN_HOME}/include
@@ -123,12 +125,12 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp ")
 include_directories(${INCLUDE_PATH})
 link_directories(${LIB_PATH})
 
-set(CLS_LIB_NAME cls_tensorrt)
-add_subdirectory(cls)
+set(VIT_LIB_NAME vit_tensorrt)
+add_subdirectory(vit)
 add_subdirectory(examples)
 
 set(ALG_LIB_NAME ${CLS_LIB_NAME})
 configure_file (
-        ${PROJECT_SOURCE_DIR}/cls/ai_alg_version.h.in
-        ${PROJECT_SOURCE_DIR}/cls/ai_alg_version.h
+        ${PROJECT_SOURCE_DIR}/vit/ai_alg_version.h.in
+        ${PROJECT_SOURCE_DIR}/vit/ai_alg_version.h
 )

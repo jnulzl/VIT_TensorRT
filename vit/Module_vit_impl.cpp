@@ -1,36 +1,17 @@
 #include <assert.h>
 #include <string.h>
 
-#include "Module_cls_impl.h"
+#include "Module_vit_impl.h"
 #include "alg_define.h"
 #include "debug.h"
 
-static void softmax(float* vec, size_t len)
+namespace tensorrt_vit
 {
-    float sum = 0.0f;
-    for (size_t i = 0; i < len; i++)
-    {
-        sum += std::exp(vec[i]);
-    }
-    for (size_t i = 0; i < len; i++)
-    {
-        vec[i] = exp(vec[i]) / sum;
-    }
-}
+    CModule_vit_impl::CModule_vit_impl() = default;
 
-namespace tensorrt_cls
-{
-    CModule_cls_impl::CModule_cls_impl()
-    {
+    CModule_vit_impl::~CModule_vit_impl() = default;
 
-    }
-
-    CModule_cls_impl::~CModule_cls_impl()
-    {
-
-    }
-
-    void CModule_cls_impl::deinit()
+    void CModule_vit_impl::deinit()
     {
         engine_deinit();
 #ifdef AI_ALG_DEBUG
@@ -38,22 +19,22 @@ namespace tensorrt_cls
 #endif
     }
 
-    void CModule_cls_impl::init(const BaseConfig &config)
+    void CModule_vit_impl::init(const BaseConfig &config)
     {
         config_ = config;
         engine_init();
 
         frame_ids_.resize(config_.batch_size);
-        cls_batch_.resize(config_.batch_size);
+        segment_batch_.resize(config_.batch_size);
     }
 
-    void CModule_cls_impl::pre_batch_process(const ImageInfoUint8 *imageInfos, int batch_size)
+    void CModule_vit_impl::pre_batch_process(const ImageInfoUint8 *imageInfos, int batch_size)
     {
         //pre_batch_process cpu version
     }
 
 
-    void CModule_cls_impl::process_batch(const ImageInfoUint8 *imageInfos, int batch_size)
+    void CModule_vit_impl::process_batch(const ImageInfoUint8 *imageInfos, int batch_size)
     {
         //TODO : check if batch_size == config_.batch_size
         for (int bs = 0; bs < config_.batch_size; ++bs)
@@ -90,35 +71,26 @@ namespace tensorrt_cls
 #endif
     }
 
-    void CModule_cls_impl::post_process()
+    void CModule_vit_impl::post_process()
     {
-        int num_cls = data_out_.size() / config_.batch_size;
+        int vit_embed_len = data_out_.size() / config_.batch_size;
+        AIALG_PRINT("hidden_size_ : %d\n", hidden_size_);
+        int token_num = vit_embed_len / hidden_size_;
         for (int bs = 0; bs < config_.batch_size; ++bs)
         {
-            float* score_bs = data_out_.data() + bs * num_cls;
-            softmax(score_bs, num_cls);
-            int max_index = 0;
-            float max_score = score_bs[0];
-            for (int idx = 1; idx < num_cls; ++idx)
-            {
-                if(score_bs[idx] > max_score)
-                {
-                    max_score = score_bs[idx];
-                    max_index = idx;
-                }
-            }
-            cls_batch_[bs].label = max_index;
-            cls_batch_[bs].score = max_score;
-            cls_batch_[bs].frame_id = frame_ids_[bs];
+            float* vit_embed = data_out_.data() + bs * vit_embed_len;
+            segment_batch_[bs].probs = vit_embed;
+            segment_batch_[bs].height = token_num;
+            segment_batch_[bs].width = hidden_size_;
         }
     }
 
-    const ClsInfo* CModule_cls_impl::get_result()
+    const SegmentResult* CModule_vit_impl::get_result()
     {
-        return cls_batch_.data();
+        return segment_batch_.data();
     }
 
-    const BaseConfig* CModule_cls_impl::get_config() const
+    const BaseConfig* CModule_vit_impl::get_config() const
     {
         return &config_;;
     }

@@ -1,0 +1,33 @@
+{
+    "version": 3,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 19,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "Build_Release_Linux",
+            "generator": "Unix Makefiles",
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "YES",
+                "CMAKE_CXX_FLAGS": "-Wl,--warn-unresolved-symbols",
+                // "TRT_HOME":"/mnt/d/codes/third_party/Linux/TensorRT-10.5.0.18",
+                "OpenCV_DIR":"/mnt/d/codes/third_party/Linux/OpenCV455",
+                "MOT_PYTHON_LIB":"ON",
+                "JAVA_API":"ON",
+                "ALG_NAME_LOWER":"vit",
+                "PYTHON_EXECUTABLE":"/home/jnulzl/Softwares/anaconda3/bin/python3.9"
+            }
+        },
+        {
+            "name": "Build_Debug_Linux",
+            "inherits": "Build_Release_Linux",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        }
+    ]
+}

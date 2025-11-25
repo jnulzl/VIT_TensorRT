@@ -1,4 +1,4 @@
-set(demo_src zhedang.cpp)
+set(demo_src demo_batch_vit_opencv_cuda_images.cpp)
 get_filename_component(exe_name ${demo_src} NAME_WLE)
 add_executable(${exe_name} ${demo_src})
 
@@ -20,7 +20,7 @@ target_link_options(${exe_name} PRIVATE
         )
 
 target_link_libraries(${exe_name} PRIVATE
-        ${CLS_LIB_NAME}
+        ${VIT_LIB_NAME}
         opencv_core
         opencv_highgui
         opencv_imgproc

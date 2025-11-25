@@ -1,19 +1,19 @@
-#ifndef MODULE_CLS_H
-#define MODULE_CLS_H
+#ifndef MODULE_VIT_H
+#define MODULE_VIT_H
 
 #include <string>
 #include <vector>
 #include "data_type.h"
 #include "alg_define.h"
 
-namespace tensorrt_cls
+namespace tensorrt_vit
 {
-    class AIALG_PUBLIC CModule_cls
+    class AIALG_PUBLIC CModule_vit
     {
     public:
-        CModule_cls();
+        CModule_vit();
 
-        ~CModule_cls();
+        ~CModule_vit();
 
         void init(const BaseConfig &config);
 
@@ -21,7 +21,7 @@ namespace tensorrt_cls
 
         void process_batch(const ImageInfoUint8 *imageInfos, int batch_size);
 
-        const ClsInfo *get_result();
+        const SegmentResult* get_result();
 
         const BaseConfig* get_config() const;
 
@@ -30,5 +30,5 @@ namespace tensorrt_cls
     };
 }
 
-#endif // MODULE_CLS_H
+#endif // MODULE_VIT_H
 

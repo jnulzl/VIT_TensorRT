@@ -2,8 +2,8 @@
 // Created by lizhaoliang-os on 2020/6/9.
 //
 
-#ifndef MODULE_CLS_TENSORRT_IMPL_H
-#define MODULE_CLS_TENSORRT_IMPL_H
+#ifndef MODULE_VIT_TENSORRT_IMPL_H
+#define MODULE_VIT_TENSORRT_IMPL_H
 
 #include <memory>
 
@@ -14,16 +14,16 @@
 #include <common.h> // for include samplesCommon::InferDeleter
 #include <npp.h> // For gpu preprocess function(affineTransform, bgr2rgb, chw, (x - a) * b)
 
-#include "Module_cls_impl.h"
+#include "Module_vit_impl.h"
 
-namespace tensorrt_cls
+namespace tensorrt_vit
 {
-    class CModule_cls_tensorrt_impl : public CModule_cls_impl
+    class CModule_vit_tensorrt_impl : public CModule_vit_impl
     {
     public:
-        CModule_cls_tensorrt_impl();
+        CModule_vit_tensorrt_impl();
 
-        virtual ~CModule_cls_tensorrt_impl();
+        virtual ~CModule_vit_tensorrt_impl();
 
     private:
         virtual void engine_init() override;

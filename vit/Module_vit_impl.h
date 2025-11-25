@@ -1,19 +1,19 @@
-#ifndef MODULE_CLS_IMPL_H
-#define MODULE_CLS_IMPL_H
+#ifndef MODULE_VIT_IMPL_H
+#define MODULE_VIT_IMPL_H
 
 #include <string>
 #include <vector>
 
 #include "data_type.h"
 
-namespace tensorrt_cls
+namespace tensorrt_vit
 {
-    class CModule_cls_impl
+    class CModule_vit_impl
     {
     public:
-        CModule_cls_impl();
+        CModule_vit_impl();
 
-        virtual ~CModule_cls_impl();
+        virtual ~CModule_vit_impl();
 
         void init(const BaseConfig &config);
 
@@ -21,7 +21,7 @@ namespace tensorrt_cls
 
         void process_batch(const ImageInfoUint8 *imageInfos, int batch_size);
 
-        const ClsInfo* get_result();
+        const SegmentResult* get_result();
 
         const BaseConfig* get_config() const;
 
@@ -38,11 +38,12 @@ namespace tensorrt_cls
 
     protected:
         BaseConfig config_;
+        int hidden_size_ = -1;
 
         std::vector<float> data_out_;
         std::vector<int> frame_ids_;
-        std::vector<ClsInfo> cls_batch_;
+        std::vector<SegmentResult> segment_batch_;
     };
 }
-#endif // MODULE_CLS_IMPL_H
+#endif // MODULE_VIT_IMPL_H
 
