@@ -15,13 +15,13 @@ namespace tensorrt_vit
 
         ~CModule_vit();
 
-        void init(const BaseConfig &config);
+        void init(const BaseConfig& config);
 
         void deinit();
 
-        void process_batch(const ImageInfoUint8 *imageInfos, int batch_size);
+        void process_batch(const ImageInfoUint8* imageInfos, int batch_size);
 
-        const SegmentResult* get_result();
+        const NetFloatTensor* get_result() const;
 
         const BaseConfig* get_config() const;
 

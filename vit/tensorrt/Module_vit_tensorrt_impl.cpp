@@ -29,7 +29,7 @@ namespace tensorrt_vit
 
     CModule_vit_tensorrt_impl::CModule_vit_tensorrt_impl() = default;
 
-    CModule_vit_tensorrt_impl::~CModule_vit_tensorrt_impl() = default;    
+    CModule_vit_tensorrt_impl::~CModule_vit_tensorrt_impl() = default;
 
     void CModule_vit_tensorrt_impl::engine_deinit()
     {
@@ -82,17 +82,18 @@ namespace tensorrt_vit
             {
                 std::cerr << "Error loading engine file: " << engine_file_path << std::endl;
             }
-            
-            runtime_ = TRTUniquePtr<nvinfer1::IRuntime>(nvinfer1::createInferRuntime(sample::gLogger.getTRTLogger()));             
+
+            runtime_ = TRTUniquePtr<nvinfer1::IRuntime>(nvinfer1::createInferRuntime(sample::gLogger.getTRTLogger()));
             if (config_.dlaCore != -1)
             {
                 runtime_->setDLACore(config_.dlaCore);
             }
 
             net_ = std::shared_ptr<nvinfer1::ICudaEngine>(
-                    runtime_->deserializeCudaEngine(engineData.data(), engineData.size()),
-                    samplesCommon::InferDeleter());
-        } else
+                runtime_->deserializeCudaEngine(engineData.data(), engineData.size()),
+                samplesCommon::InferDeleter());
+        }
+        else
         {
             builder_ = TRTUniquePtr<nvinfer1::IBuilder>(nvinfer1::createInferBuilder(sample::gLogger.getTRTLogger()));
             if (!builder_)
@@ -101,7 +102,7 @@ namespace tensorrt_vit
             }
 
             const auto explicitBatch =
-                    1U << static_cast<uint32_t>(nvinfer1::NetworkDefinitionCreationFlag::kEXPLICIT_BATCH);
+                1U << static_cast<uint32_t>(nvinfer1::NetworkDefinitionCreationFlag::kEXPLICIT_BATCH);
             network_ = TRTUniquePtr<nvinfer1::INetworkDefinition>(builder_->createNetworkV2(explicitBatch));
             if (!network_)
             {
@@ -115,7 +116,7 @@ namespace tensorrt_vit
             }
 
             parser_ = TRTUniquePtr<nvonnxparser::IParser>(
-                    nvonnxparser::createParser(*network_, sample::gLogger.getTRTLogger()));
+                nvonnxparser::createParser(*network_, sample::gLogger.getTRTLogger()));
 
             if (!parser_)
             {
@@ -137,7 +138,7 @@ namespace tensorrt_vit
             }
             config_trt_->setProfileStream(*profileStream);
 
-            TRTUniquePtr<nvinfer1::IHostMemory> plan{builder_->buildSerializedNetwork(*network_, *config_trt_)};
+            TRTUniquePtr<nvinfer1::IHostMemory> plan{ builder_->buildSerializedNetwork(*network_, *config_trt_) };
             if (!plan)
             {
                 AIALG_ASSERT(0);
@@ -152,14 +153,14 @@ namespace tensorrt_vit
             runtime_->setEngineHostCodeAllowed(true);
 
             net_ = std::shared_ptr<nvinfer1::ICudaEngine>(
-                    runtime_->deserializeCudaEngine(plan->data(), plan->size()), samplesCommon::InferDeleter());
+                runtime_->deserializeCudaEngine(plan->data(), plan->size()), samplesCommon::InferDeleter());
             if (!net_)
             {
                 AIALG_ASSERT(0);
             }
 #else
             net_ = std::shared_ptr<nvinfer1::ICudaEngine>(
-                    builder_->buildEngineWithConfig(*network_, *config_trt_), samplesCommon::InferDeleter());
+                builder_->buildEngineWithConfig(*network_, *config_trt_), samplesCommon::InferDeleter());
 
             if (!net_)
             {
@@ -175,7 +176,7 @@ namespace tensorrt_vit
                     std::cerr << "Cannot open engine file: " << engine_file_path << std::endl;
                 }
 
-                TRTUniquePtr<nvinfer1::IHostMemory> serializedEngine{net_->serialize()};
+                TRTUniquePtr<nvinfer1::IHostMemory> serializedEngine{ net_->serialize() };
                 if (!serializedEngine)
                 {
                     std::cerr << "Engine serialization failed" << std::endl;
@@ -183,7 +184,7 @@ namespace tensorrt_vit
 #ifdef AI_ALG_DEBUG
                 std::cout << "Writing TensorRT engine to " << engine_file_path << std::endl;
 #endif
-                engineFile.write(static_cast<char *>(serializedEngine->data()), serializedEngine->size());
+                engineFile.write(static_cast<char*>(serializedEngine->data()), serializedEngine->size());
                 engineFile.close();
 #ifdef AI_ALG_DEBUG
                 std::cout << "Writing TensorRT engine finished!" << std::endl;
@@ -191,14 +192,14 @@ namespace tensorrt_vit
             }
         }
         assert(network_->getNbInputs() == config_.input_names.size());
-//    mInputDims = network->getInput(0)->getDimensions();
-//    assert(mInputDims.nbDims == 4);
+        //    mInputDims = network->getInput(0)->getDimensions();
+        //    assert(mInputDims.nbDims == 4);
 
         assert(network_->getNbOutputs() == config_.output_names.size());
-//    mOutputDims = network->getOutput(0)->getDimensions();
-//    assert(mOutputDims.nbDims == 2);
+        //    mOutputDims = network->getOutput(0)->getDimensions();
+        //    assert(mOutputDims.nbDims == 2);
 
-        // Create RAII buffer manager object
+                // Create RAII buffer manager object
         buffers_ = std::make_unique<samplesCommon::BufferManager>(net_, config_.batch_size);
         context_ = TRTUniquePtr<nvinfer1::IExecutionContext>(net_->createExecutionContext());
         if (!context_)
@@ -209,22 +210,22 @@ namespace tensorrt_vit
         // For gpu preprocess
         /************Device memory allocator and initialization***********/
         dst_pixel_num_ = config_.net_inp_height * config_.net_inp_width * config_.net_inp_channels;
-        dst_ptr_d_ = reinterpret_cast<Npp8u *>(cudaFastMalloc(sizeof(Npp8u) * dst_pixel_num_ * config_.batch_size,
-                                                              config_.device_id));
+        dst_ptr_d_ = reinterpret_cast<Npp8u*>(cudaFastMalloc(sizeof(Npp8u) * dst_pixel_num_ * config_.batch_size,
+            config_.device_id));
         if (!dst_ptr_d_)
         {
             AIALG_ASSERT(0);
         }
 
-        dst_float_ptr_d_ = reinterpret_cast<Npp32f *>(cudaFastMalloc(
-                sizeof(Npp32f) * dst_pixel_num_ * config_.batch_size, config_.device_id));
+        dst_float_ptr_d_ = reinterpret_cast<Npp32f*>(cudaFastMalloc(
+            sizeof(Npp32f) * dst_pixel_num_ * config_.batch_size, config_.device_id));
         if (!dst_float_ptr_d_)
         {
             AIALG_ASSERT(0);
         }
 
-        dst_chw_float_ptr_d_ = reinterpret_cast<Npp32f *>(cudaFastMalloc(
-                sizeof(Npp32f) * dst_pixel_num_ * config_.batch_size, config_.device_id));
+        dst_chw_float_ptr_d_ = reinterpret_cast<Npp32f*>(cudaFastMalloc(
+            sizeof(Npp32f) * dst_pixel_num_ * config_.batch_size, config_.device_id));
         if (!dst_chw_float_ptr_d_)
         {
             AIALG_ASSERT(0);
@@ -233,14 +234,14 @@ namespace tensorrt_vit
         // For batch gpu preprocess
         src_ptrs_d_.resize(config_.batch_size, nullptr);
         src_pixel_nums_pre_.resize(config_.batch_size, 0);
-        coeffs_d_ = reinterpret_cast<Npp64f *>(cudaFastMalloc(sizeof(Npp64f) * 6 * config_.batch_size,
-                                                              config_.device_id));
+        coeffs_d_ = reinterpret_cast<Npp64f*>(cudaFastMalloc(sizeof(Npp64f) * 6 * config_.batch_size,
+            config_.device_id));
         if (!coeffs_d_)
         {
             AIALG_ASSERT(0);
         }
-        pBatchList_d_ = reinterpret_cast<NppiWarpAffineBatchCXR *>(cudaFastMalloc(
-                sizeof(NppiWarpAffineBatchCXR) * config_.batch_size, config_.device_id));
+        pBatchList_d_ = reinterpret_cast<NppiWarpAffineBatchCXR*>(cudaFastMalloc(
+            sizeof(NppiWarpAffineBatchCXR) * config_.batch_size, config_.device_id));
         if (!pBatchList_d_)
         {
             AIALG_ASSERT(0);
@@ -249,17 +250,17 @@ namespace tensorrt_vit
     }
 
 
-    void CModule_vit_tensorrt_impl::pre_process_gpu(const ImageInfoUint8 *imageInfoUint8, int bs)
+    void CModule_vit_tensorrt_impl::pre_process_gpu(const ImageInfoUint8* imageInfoUint8, int bs)
     {
 #ifdef AI_ALG_DEBUG
         std::cout << "Using pre_process_gpu" << std::endl;
 #endif
         if (!imageInfoUint8->data)
         {
-            CUDACHECK(cudaMemset(reinterpret_cast<Npp32f *>(buffers_->getDeviceBuffer(config_.input_names[0])) +
-                                 bs * config_.net_inp_channels * config_.net_inp_width * config_.net_inp_height,
-                                 0, sizeof(Npp32f) * config_.net_inp_channels * config_.net_inp_width *
-                                    config_.net_inp_height));
+            CUDACHECK(cudaMemset(reinterpret_cast<Npp32f*>(buffers_->getDeviceBuffer(config_.input_names[0])) +
+                bs * config_.net_inp_channels * config_.net_inp_width * config_.net_inp_height,
+                0, sizeof(Npp32f) * config_.net_inp_channels * config_.net_inp_width *
+                config_.net_inp_height));
 
             return;
         }
@@ -269,37 +270,38 @@ namespace tensorrt_vit
         {
             cudaFastFree(src_ptrs_d_[bs], config_.device_id);
             src_pixel_nums_pre_[bs] = src_pixel_num;
-            src_ptrs_d_[bs] = reinterpret_cast<Npp8u *>(cudaFastMalloc(sizeof(Npp8u) * src_pixel_nums_pre_[bs],
-                                                                       config_.device_id));
+            src_ptrs_d_[bs] = reinterpret_cast<Npp8u*>(cudaFastMalloc(sizeof(Npp8u) * src_pixel_nums_pre_[bs],
+                config_.device_id));
         }
         if (imageInfoUint8->is_device_data)
         {
             CUDACHECK(cudaMemcpy(src_ptrs_d_[bs], imageInfoUint8->data, sizeof(Npp8u) * src_pixel_num,
-                                 cudaMemcpyDeviceToDevice));
-        } else
+                cudaMemcpyDeviceToDevice));
+        }
+        else
         {
             CUDACHECK(cudaMemcpy(src_ptrs_d_[bs], imageInfoUint8->data, sizeof(Npp8u) * src_pixel_num,
-                                 cudaMemcpyHostToDevice));
+                cudaMemcpyHostToDevice));
         }
 
         /**********************getAffineTransform*************************/
-        NppiRect oSrcROI = {.x=0, .y=0, .width=imageInfoUint8->img_width, .height=imageInfoUint8->img_height};
-        double aQuad[4][2] = {{0.0,                         0.0},
+        NppiRect oSrcROI = { .x = 0, .y = 0, .width = imageInfoUint8->img_width, .height = imageInfoUint8->img_height };
+        double aQuad[4][2] = { {0.0,                         0.0},
                               {1.0 * config_.net_inp_width, 0.0},
                               {1.0 * config_.net_inp_width, 1.0 * config_.net_inp_height},
-                              {0,                           1.0 * config_.net_inp_height}};
+                              {0,                           1.0 * config_.net_inp_height} };
         double aCoeffs[2][3];
         nppiGetAffineTransform(oSrcROI, aQuad, aCoeffs);
 
         /**********************warpAffine**********************/
-        nppiWarpAffine_8u_C3R(src_ptrs_d_[bs], {imageInfoUint8->img_width, imageInfoUint8->img_height},
-                              sizeof(Npp8u) * imageInfoUint8->stride,
-                              {0, 0, imageInfoUint8->img_width, imageInfoUint8->img_height},
-                              dst_ptr_d_ + bs * dst_pixel_num_,
-                              sizeof(Npp8u) * config_.net_inp_width * config_.net_inp_channels,
-                              {0, 0, config_.net_inp_width, config_.net_inp_height},
-                              aCoeffs,
-                              NPPI_INTER_LINEAR);
+        nppiWarpAffine_8u_C3R(src_ptrs_d_[bs], { imageInfoUint8->img_width, imageInfoUint8->img_height },
+            sizeof(Npp8u) * imageInfoUint8->stride,
+            { 0, 0, imageInfoUint8->img_width, imageInfoUint8->img_height },
+            dst_ptr_d_ + bs * dst_pixel_num_,
+            sizeof(Npp8u) * config_.net_inp_width * config_.net_inp_channels,
+            { 0, 0, config_.net_inp_width, config_.net_inp_height },
+            aCoeffs,
+            NPPI_INTER_LINEAR);
 
         //std::vector<uint8_t> img_after_warpAffine_data;
         //img_after_warpAffine_data.resize(dst_pixel_num_);
@@ -309,64 +311,65 @@ namespace tensorrt_vit
         //                                       img_after_warpAffine_data.data());
         //cv::imwrite("aaaaaaaaaaaa.jpg", img_after_warpAffine);
 
-       if (0 == config_.model_include_preprocess)
-       {
-           /**********************bgr2rgb*************************/
-           const int aDstOrder[3] = {2, 1, 0};
-           nppiSwapChannels_8u_C3IR(dst_ptr_d_ + bs * dst_pixel_num_,
-                                    sizeof(Npp8u) * config_.net_inp_width * config_.net_inp_channels,
-                                    {config_.net_inp_width, config_.net_inp_height},
-                                    aDstOrder);
-       }
+        if (0 == config_.model_include_preprocess)
+        {
+            /**********************bgr2rgb*************************/
+            const int aDstOrder[3] = { 2, 1, 0 };
+            nppiSwapChannels_8u_C3IR(dst_ptr_d_ + bs * dst_pixel_num_,
+                sizeof(Npp8u) * config_.net_inp_width * config_.net_inp_channels,
+                { config_.net_inp_width, config_.net_inp_height },
+                aDstOrder);
+        }
         /**********************uint8 -> float*****************/
         nppiConvert_8u32f_C3R(dst_ptr_d_ + bs * dst_pixel_num_,
-                              sizeof(Npp8u) * config_.net_inp_width * config_.net_inp_channels,
-                              dst_float_ptr_d_ + bs * dst_pixel_num_,
-                              sizeof(Npp32f) * config_.net_inp_width * config_.net_inp_channels,
-                              {config_.net_inp_width, config_.net_inp_height});
+            sizeof(Npp8u) * config_.net_inp_width * config_.net_inp_channels,
+            dst_float_ptr_d_ + bs * dst_pixel_num_,
+            sizeof(Npp32f) * config_.net_inp_width * config_.net_inp_channels,
+            { config_.net_inp_width, config_.net_inp_height });
 
-        Npp32f *net_input_buffer_d = reinterpret_cast<Npp32f *>(buffers_->getDeviceBuffer(config_.input_names[0]));
+        Npp32f* net_input_buffer_d = reinterpret_cast<Npp32f*>(buffers_->getDeviceBuffer(config_.input_names[0]));
         if (0 == config_.model_include_preprocess)
         {
             /**********************(x - a) / b*********************/
             /*1.-------- y = (x - a) --------*/
             // const Npp32f means[3] = {0.0f, 0.0f, 0.0f};
             nppiSubC_32f_C3IR(config_.means, dst_float_ptr_d_ + bs * dst_pixel_num_,
-                              sizeof(Npp32f) * config_.net_inp_width * config_.net_inp_channels,
-                              {config_.net_inp_width, config_.net_inp_height});
+                sizeof(Npp32f) * config_.net_inp_width * config_.net_inp_channels,
+                { config_.net_inp_width, config_.net_inp_height });
 
             /*2.---------- y * s ----------*/
             // const Npp32f scales[3] = {0.00392157f, 0.00392157f, 0.00392157f};
             nppiMulC_32f_C3IR(config_.scales, dst_float_ptr_d_ + bs * dst_pixel_num_,
-                              sizeof(Npp32f) * config_.net_inp_width * config_.net_inp_channels,
-                              {config_.net_inp_width, config_.net_inp_height});
+                sizeof(Npp32f) * config_.net_inp_width * config_.net_inp_channels,
+                { config_.net_inp_width, config_.net_inp_height });
 
             /**********************hwc2chw*************************/
-            Npp32f *const aDst[3] = {net_input_buffer_d + bs * dst_pixel_num_,
+            Npp32f* const aDst[3] = { net_input_buffer_d + bs * dst_pixel_num_,
                                      net_input_buffer_d + bs * dst_pixel_num_ +
                                      config_.net_inp_width * config_.net_inp_height,
                                      net_input_buffer_d + bs * dst_pixel_num_ +
-                                     2 * config_.net_inp_width * config_.net_inp_height};
+                                     2 * config_.net_inp_width * config_.net_inp_height };
             nppiCopy_32f_C3P3R(dst_float_ptr_d_ + bs * dst_pixel_num_,
-                               sizeof(Npp32f) * config_.net_inp_width * config_.net_inp_channels,
-                               aDst,
-                               sizeof(Npp32f) * config_.net_inp_width,
-                               {config_.net_inp_width, config_.net_inp_height});
-        } else
+                sizeof(Npp32f) * config_.net_inp_width * config_.net_inp_channels,
+                aDst,
+                sizeof(Npp32f) * config_.net_inp_width,
+                { config_.net_inp_width, config_.net_inp_height });
+        }
+        else
         {
             /*------copy preprocessed data to net input poiner------*/
             CUDACHECK(cudaMemcpy(
-                    net_input_buffer_d + bs * dst_pixel_num_,
-                    dst_float_ptr_d_ + bs * dst_pixel_num_,
-                    sizeof(Npp32f) * dst_pixel_num_, cudaMemcpyDeviceToDevice));
+                net_input_buffer_d + bs * dst_pixel_num_,
+                dst_float_ptr_d_ + bs * dst_pixel_num_,
+                sizeof(Npp32f) * dst_pixel_num_, cudaMemcpyDeviceToDevice));
         }
     }
 
-    void CModule_vit_tensorrt_impl::pre_batch_process(const ImageInfoUint8 *imageInfos, int batch_size)
+    void CModule_vit_tensorrt_impl::pre_batch_process(const ImageInfoUint8* imageInfos, int batch_size)
     {
         if (1 == config_.model_include_preprocess)
         {
-//        #pragma omp parallel for
+            //        #pragma omp parallel for
             for (int bs = 0; bs < batch_size; ++bs)
             {
                 if (!imageInfos[bs].data)
@@ -379,17 +382,18 @@ namespace tensorrt_vit
                 {
                     cudaFastFree(src_ptrs_d_[bs], config_.device_id);
                     src_pixel_nums_pre_[bs] = src_pixel_num;
-                    src_ptrs_d_[bs] = reinterpret_cast<Npp8u *>(cudaFastMalloc(sizeof(Npp8u) * src_pixel_nums_pre_[bs],
-                                                                               config_.device_id));
+                    src_ptrs_d_[bs] = reinterpret_cast<Npp8u*>(cudaFastMalloc(sizeof(Npp8u) * src_pixel_nums_pre_[bs],
+                        config_.device_id));
                 }
                 if (imageInfos[bs].is_device_data)
                 {
                     CUDACHECK(cudaMemcpy(src_ptrs_d_[bs], imageInfos[bs].data, sizeof(Npp8u) * src_pixel_num,
-                                         cudaMemcpyDeviceToDevice));
-                } else
+                        cudaMemcpyDeviceToDevice));
+                }
+                else
                 {
                     CUDACHECK(cudaMemcpy(src_ptrs_d_[bs], imageInfos[bs].data, sizeof(Npp8u) * src_pixel_num,
-                                         cudaMemcpyHostToDevice));
+                        cudaMemcpyHostToDevice));
                 }
 
                 pBatchList_[bs].pSrc = src_ptrs_d_[bs];
@@ -397,11 +401,11 @@ namespace tensorrt_vit
                 pBatchList_[bs].pDst = dst_ptr_d_ + bs * dst_pixel_num_;
                 pBatchList_[bs].nDstStep = sizeof(Npp8u) * config_.net_inp_width * config_.net_inp_channels;
                 /**********************getAffineTransform*************************/
-                NppiRect oSrcROI = {.x=0, .y=0, .width=imageInfos[bs].img_width, .height=imageInfos[bs].img_height};
-                double aQuad[4][2] = {{0.0,                         0.0},
+                NppiRect oSrcROI = { .x = 0, .y = 0, .width = imageInfos[bs].img_width, .height = imageInfos[bs].img_height };
+                double aQuad[4][2] = { {0.0,                         0.0},
                                       {1.0 * config_.net_inp_width, 0.0},
                                       {1.0 * config_.net_inp_width, 1.0 * config_.net_inp_height},
-                                      {0.0,                         1.0 * config_.net_inp_height}};
+                                      {0.0,                         1.0 * config_.net_inp_height} };
                 double aCoeffs[2][3];
                 nppiGetAffineTransform(oSrcROI, aQuad, aCoeffs);
 
@@ -409,30 +413,31 @@ namespace tensorrt_vit
                 pBatchList_[bs].pCoeffs = coeffs_d_ + bs * 6;
             }
             CUDACHECK(cudaMemcpy(pBatchList_d_, pBatchList_.data(), sizeof(NppiWarpAffineBatchCXR) * config_.batch_size,
-                                 cudaMemcpyHostToDevice));
+                cudaMemcpyHostToDevice));
 
             nppiWarpAffineBatchInit(pBatchList_d_, config_.batch_size);
             /**********************warpAffine**********************/
-            nppiWarpAffineBatch_8u_C3R({imageInfos[0].img_width, imageInfos[0].img_height},
-                                       {0, 0, imageInfos[0].img_width, imageInfos[0].img_height},
-                                       {0, 0, config_.net_inp_height, config_.net_inp_width},
-                                       NPPI_INTER_LINEAR,
-                                       pBatchList_d_, config_.batch_size);
+            nppiWarpAffineBatch_8u_C3R({ imageInfos[0].img_width, imageInfos[0].img_height },
+                { 0, 0, imageInfos[0].img_width, imageInfos[0].img_height },
+                { 0, 0, config_.net_inp_height, config_.net_inp_width },
+                NPPI_INTER_LINEAR,
+                pBatchList_d_, config_.batch_size);
 
-//        #pragma omp parallel for
+            //        #pragma omp parallel for
             for (int bs = 0; bs < config_.batch_size; ++bs)
             {
                 /**********************uint8 -> float*****************/
                 nppiConvert_8u32f_C3R(dst_ptr_d_ + bs * dst_pixel_num_,
-                                      sizeof(Npp8u) * config_.net_inp_width * config_.net_inp_channels,
-                                      reinterpret_cast<Npp32f *>(buffers_->getDeviceBuffer(config_.input_names[0])) +
-                                      bs * dst_pixel_num_,
-                                      sizeof(Npp32f) * config_.net_inp_width * config_.net_inp_channels,
-                                      {config_.net_inp_width, config_.net_inp_height});
+                    sizeof(Npp8u) * config_.net_inp_width * config_.net_inp_channels,
+                    reinterpret_cast<Npp32f*>(buffers_->getDeviceBuffer(config_.input_names[0])) +
+                    bs * dst_pixel_num_,
+                    sizeof(Npp32f) * config_.net_inp_width * config_.net_inp_channels,
+                    { config_.net_inp_width, config_.net_inp_height });
             }
-        } else
+        }
+        else
         {
-//        #pragma omp parallel for
+            //        #pragma omp parallel for
             for (int bs = 0; bs < batch_size; ++bs)
             {
                 pre_process_gpu(&imageInfos[bs], bs);
@@ -454,67 +459,37 @@ namespace tensorrt_vit
 #ifdef AI_ALG_DEBUG
         std::chrono::time_point<std::chrono::system_clock> end_time = std::chrono::system_clock::now();
         AIALG_PRINT("TensorRT inference time %ld us\n",
-                    std::chrono::duration_cast<std::chrono::microseconds>(end_time - begin_time).count());
+            std::chrono::duration_cast<std::chrono::microseconds>(end_time - begin_time).count());
         begin_time = std::chrono::system_clock::now();
 #endif
+
+#ifdef USE_PYTHON_API
+        data_out_gpu_tensor_.data = static_cast<float*>(buffers_->getDeviceBuffer(config_.output_names[0])); // 0 is the only output
+#else
         buffers_->copyOutputToHost();
-
-        // get output
-        int net_output_num = config_.output_names.size();
-        // The numbers of output element;
-        long out_data_num = 0;
-        for (size_t idx = 0; idx < net_output_num; idx++)
-        {
-            // auto mOutputDims = net_->getBindingDimensions(net_->getBindingIndex(config_.output_names[idx].c_str()));
-            auto mOutputDims = net_->getTensorShape(config_.output_names[idx].c_str());            
-            int num_of_elems = 1;
-            for (int idy = 0; idy < mOutputDims.nbDims; ++idy)
-            {
-                num_of_elems *= mOutputDims.d[idy];
-            }
-            if (idx == 0 && hidden_size_ <= 0)
-            {
-                hidden_size_ = mOutputDims.d[mOutputDims.nbDims - 1];
-            }
-            out_data_num += num_of_elems;
-        }
-
-        if (data_out_.size() < out_data_num)
-        {
-#ifdef AI_ALG_DEBUG
-            std::cout << "Resize data_out_ : " << out_data_num << std::endl;
+        data_out_gpu_tensor_.data = static_cast<float*>(buffers_->getHostBuffer(config_.output_names[0])); // 0 is the only output        
 #endif
-            data_out_.resize(out_data_num);
-        }
 
-        float *data_ = data_out_.data();
-        for (size_t idx = 0; idx < net_output_num; idx++)
-        {
-            // auto mOutputDims = net_->getBindingDimensions(net_->getBindingIndex(config_.output_names[idx].c_str()));^M
-            auto mOutputDims = net_->getTensorShape(config_.output_names[idx].c_str());            
-            int step = 1;
-            for (int idy = 0; idy < mOutputDims.nbDims; ++idy)
-            {
-                step *= mOutputDims.d[idy];
-            }
-            float *output = static_cast<float*>(buffers_->getHostBuffer(config_.output_names[idx]));
-            memcpy(data_, output, sizeof(float) * step);
-        }
+        auto mOutputDims = net_->getTensorShape(config_.output_names[0].c_str());
+        data_out_gpu_tensor_.batch = mOutputDims.d[0]; // batch_size
+        data_out_gpu_tensor_.channels = mOutputDims.d[1]; // token_num
+        data_out_gpu_tensor_.height = mOutputDims.d[2]; // hidden_size
+
 #ifdef AI_ALG_DEBUG
         end_time = std::chrono::system_clock::now();
         AIALG_PRINT("postprocess time %ld us\n",
-                    std::chrono::duration_cast<std::chrono::microseconds>(end_time - begin_time).count());
+            std::chrono::duration_cast<std::chrono::microseconds>(end_time - begin_time).count());
 #endif
     }
 
-    bool CModule_vit_tensorrt_impl::constructNetwork(TRTUniquePtr<nvinfer1::IBuilder> &builder,
-                                                     TRTUniquePtr<nvinfer1::INetworkDefinition> &network,
-                                                     TRTUniquePtr<nvinfer1::IBuilderConfig> &config,
-                                                     TRTUniquePtr<nvonnxparser::IParser> &parser)
+    bool CModule_vit_tensorrt_impl::constructNetwork(TRTUniquePtr<nvinfer1::IBuilder>& builder,
+        TRTUniquePtr<nvinfer1::INetworkDefinition>& network,
+        TRTUniquePtr<nvinfer1::IBuilderConfig>& config,
+        TRTUniquePtr<nvonnxparser::IParser>& parser)
     {
 
         auto parsed = parser->parseFromFile(config_.weights_path.c_str(),
-                                            static_cast<int>(sample::gLogger.getReportableSeverity()));
+            static_cast<int>(sample::gLogger.getReportableSeverity()));
         if (!parsed)
         {
             return false;

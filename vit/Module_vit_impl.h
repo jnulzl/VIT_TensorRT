@@ -15,18 +15,18 @@ namespace tensorrt_vit
 
         virtual ~CModule_vit_impl();
 
-        void init(const BaseConfig &config);
+        void init(const BaseConfig& config);
 
         void deinit();
 
-        void process_batch(const ImageInfoUint8 *imageInfos, int batch_size);
+        void process_batch(const ImageInfoUint8* imageInfos, int batch_size);
 
-        const SegmentResult* get_result();
+        const NetFloatTensor* get_result() const;
 
         const BaseConfig* get_config() const;
 
     protected:
-        virtual void pre_batch_process(const ImageInfoUint8 *imageInfos, int batch_size);
+        virtual void pre_batch_process(const ImageInfoUint8* imageInfos, int batch_size);
 
         virtual void post_process();
 
@@ -38,11 +38,10 @@ namespace tensorrt_vit
 
     protected:
         BaseConfig config_;
-        int hidden_size_ = -1;
+        NetFloatTensor data_out_gpu_tensor_{};
 
         std::vector<float> data_out_;
         std::vector<int> frame_ids_;
-        std::vector<SegmentResult> segment_batch_;
     };
 }
 #endif // MODULE_VIT_IMPL_H

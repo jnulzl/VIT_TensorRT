@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.15)
 project(VITTensorRT CUDA CXX C)
 
 set(CMAKE_SYSTEM_NAME "Linux") # Linux Android
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_COLOR_MAKEFILE ON)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
@@ -75,20 +75,20 @@ if("Linux" STREQUAL ${CMAKE_SYSTEM_NAME})
 
     ##############TensorRT##############
     set(TENSORRT_INCLUDE
-            ${TRT_SAMPLES_COMMON_HOME}
-            ${TRT_SAMPLES_HOME}
-            ${TRT_HOME}/include
-            ${CUDA_HOME}/include
-            ${CUDNN_HOME}/include
-            )
+        ${TRT_SAMPLES_COMMON_HOME}
+        ${TRT_SAMPLES_HOME}
+        ${TRT_HOME}/include
+        ${CUDA_HOME}/include
+        ${CUDNN_HOME}/include
+    )
     set(TENSORRT_LIB_PATH
-            ${CUDA_HOME}/lib64
-            ${CUDA_HOME}/lib
-            ${CUDNN_HOME}/lib64
-            ${CUDNN_HOME}/lib
-            ${TRT_HOME}/lib64
-            ${TRT_HOME}/lib
-            )
+        ${CUDA_HOME}/lib64
+        ${CUDA_HOME}/lib
+        ${CUDNN_HOME}/lib64
+        ${CUDNN_HOME}/lib
+        ${TRT_HOME}/lib64
+        ${TRT_HOME}/lib
+    )
 endif()
 
 ##############OpenCV##############
@@ -97,40 +97,49 @@ if(NOT OpenCV_DIR)
 endif()
 message(STATUS "OpenCV_DIR :  " ${OpenCV_DIR})
 set(OpenCV_INCLUDE
-        ${OpenCV_DIR}/include
-        ${OpenCV_DIR}/include/opencv2
-        ${OpenCV_DIR}/include/opencv4
-        ${OpenCV_DIR}/include/opencv4/opencv2)
+    ${OpenCV_DIR}/include
+    ${OpenCV_DIR}/include/opencv2
+    ${OpenCV_DIR}/include/opencv4
+    ${OpenCV_DIR}/include/opencv4/opencv2)
 set(OpenCV_LIB_PATH
-        ${OpenCV_DIR}/lib
-        ${OpenCV_DIR}/lib64
-        ${OpenCV_DIR}/lib/x86_64-linux-gnu
-        )
+    ${OpenCV_DIR}/lib
+    ${OpenCV_DIR}/lib64
+    ${OpenCV_DIR}/lib/x86_64-linux-gnu
+)
 
 file(MAKE_DIRECTORY ${OUTPUT_DIRECTORY})
 set(EXECUTABLE_OUTPUT_PATH ${OUTPUT_DIRECTORY})
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY  ${EXECUTABLE_OUTPUT_PATH})
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY  ${EXECUTABLE_OUTPUT_PATH})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${EXECUTABLE_OUTPUT_PATH})
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${EXECUTABLE_OUTPUT_PATH})
 
 
 set(INCLUDE_PATH ${INCLUDE_PATH}
-        ${PROJECT_SOURCE_DIR}/common
-        ${TENSORRT_INCLUDE}
-        ${OpenCV_INCLUDE})
+    ${PROJECT_SOURCE_DIR}/common
+    ${TENSORRT_INCLUDE}
+    ${OpenCV_INCLUDE})
 set(LIB_PATH ${LIB_PATH}
-        ${TENSORRT_LIB_PATH}
-        ${OpenCV_LIB_PATH})
+    ${TENSORRT_LIB_PATH}
+    ${OpenCV_LIB_PATH})
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp ")
 include_directories(${INCLUDE_PATH})
 link_directories(${LIB_PATH})
 
-set(VIT_LIB_NAME vit_tensorrt)
-add_subdirectory(vit)
-add_subdirectory(examples)
+if(PYTHON_API)
+    add_compile_definitions(USE_PYTHON_API)
+    set(VIT_LIB_NAME vit_tensorrt)
+else()
+    set(VIT_LIB_NAME vit_tensorrt_output_cpu)
+endif()
 
-set(ALG_LIB_NAME ${CLS_LIB_NAME})
-configure_file (
-        ${PROJECT_SOURCE_DIR}/vit/ai_alg_version.h.in
-        ${PROJECT_SOURCE_DIR}/vit/ai_alg_version.h
+add_subdirectory(vit)
+
+if(NOT PYTHON_API)
+    add_subdirectory(examples)
+endif()
+
+set(ALG_LIB_NAME ${VIT_LIB_NAME})
+configure_file(
+    ${PROJECT_SOURCE_DIR}/vit/ai_alg_version.h.in
+    ${PROJECT_SOURCE_DIR}/vit/ai_alg_version.h
 )

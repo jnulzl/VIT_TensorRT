@@ -30,8 +30,8 @@ int main(int argc, char* argv[])
     std::string input_src;
 
     BaseConfig config_tmp;
-    float means_rgb[3] = {123.675f, 116.28f , 103.53f};
-    float scales_rgb[3] = {0.229f, 0.224f, 0.225f};
+    float means_rgb[3] = { 123.675f, 116.28f , 103.53f };
+    float scales_rgb[3] = { 0.0171f, 0.0175f  , 0.0174f };
 
     config_tmp.means[0] = means_rgb[0];
     config_tmp.means[1] = means_rgb[1];
@@ -44,11 +44,11 @@ int main(int argc, char* argv[])
     config_tmp.net_inp_channels = 3;
     config_tmp.model_include_preprocess = 0;
 
-    if(argc < 7)
+    if (argc < 7)
     {
         std::cout << "Usage:\n\t "
-                  << argv[0] << " trt_model_path input_size batch_size device_id is_save_res image_list_txt"
-                  << std::endl;
+            << argv[0] << " trt_model_path input_size batch_size device_id is_save_res image_list_txt"
+            << std::endl;
         return -1;
     }
     std::vector<std::string> image_list;
@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
     std::vector<ImageInfoUint8> img_batch(config_tmp.batch_size);
     std::vector<cv::Mat> frame_bgrs(config_tmp.batch_size);
     int batch_num = image_list.size() / config_tmp.batch_size;
-    for(int idx = 0; idx < batch_num; idx++)
+    for (int idx = 0; idx < batch_num; idx++)
     {
         for (int bs = 0; bs < config_tmp.batch_size; ++bs)
         {
@@ -94,19 +94,19 @@ int main(int argc, char* argv[])
         vit.process_batch(img_batch.data(), config_tmp.batch_size);
         std::chrono::time_point<std::chrono::system_clock> finishTP1 = std::chrono::system_clock::now();
 
-        const SegmentResult* res = vit.get_result();
+        const NetFloatTensor* res = vit.get_result();
         std::cout << "Frame = " << frame_id << " Batch = " << config_tmp.batch_size << " TensorRT process time = " << std::chrono::duration_cast<std::chrono::microseconds>(finishTP1 - startTP).count() << " us" << std::endl;
-        if(is_save_res)
+        if (is_save_res)
         {
+            int vit_embedding_size = res->channels * res->height;
             for (int bs = 0; bs < config_tmp.batch_size; ++bs)
             {
-                if(img_batch[bs].data)
+                if (res->data)
                 {
-                    int vit_embedding_size = res[bs].height * res[bs].width;
-                    for(int idx = 0; idx < vit_embedding_size; idx++)
+                    for (int idx = 0; idx < vit_embedding_size; idx++)
                     {
-                        std::printf("%.6f ", res[bs].probs[idx]);
-                        if(0 == (idx + 1) % res[bs].width)
+                        std::printf("%.6f ", res->data[idx + bs * vit_embedding_size]);
+                        if (0 == (idx + 1) % res->height)
                         {
                             std::printf("\n");
                         }

@@ -19,22 +19,21 @@ namespace tensorrt_vit
 #endif
     }
 
-    void CModule_vit_impl::init(const BaseConfig &config)
+    void CModule_vit_impl::init(const BaseConfig& config)
     {
         config_ = config;
         engine_init();
 
         frame_ids_.resize(config_.batch_size);
-        segment_batch_.resize(config_.batch_size);
     }
 
-    void CModule_vit_impl::pre_batch_process(const ImageInfoUint8 *imageInfos, int batch_size)
+    void CModule_vit_impl::pre_batch_process(const ImageInfoUint8* imageInfos, int batch_size)
     {
         //pre_batch_process cpu version
     }
 
 
-    void CModule_vit_impl::process_batch(const ImageInfoUint8 *imageInfos, int batch_size)
+    void CModule_vit_impl::process_batch(const ImageInfoUint8* imageInfos, int batch_size)
     {
         //TODO : check if batch_size == config_.batch_size
         for (int bs = 0; bs < config_.batch_size; ++bs)
@@ -51,7 +50,7 @@ namespace tensorrt_vit
 #ifdef AI_ALG_DEBUG
         std::chrono::time_point<std::chrono::system_clock> end_time = std::chrono::system_clock::now();
         AIALG_PRINT("Preprocess time %ld us\n",
-                    std::chrono::duration_cast<std::chrono::microseconds>(end_time - begin_time).count());
+            std::chrono::duration_cast<std::chrono::microseconds>(end_time - begin_time).count());
 #endif
 
         engine_run();
@@ -59,7 +58,7 @@ namespace tensorrt_vit
 #ifdef AI_ALG_DEBUG
         std::chrono::time_point<std::chrono::system_clock> end_time_run = std::chrono::system_clock::now();
         AIALG_PRINT("Inference time %ld us\n",
-                    std::chrono::duration_cast<std::chrono::microseconds>(end_time_run - end_time).count());
+            std::chrono::duration_cast<std::chrono::microseconds>(end_time_run - end_time).count());
 #endif
 
         post_process();
@@ -67,27 +66,18 @@ namespace tensorrt_vit
 #ifdef AI_ALG_DEBUG
         std::chrono::time_point<std::chrono::system_clock> end_time_post = std::chrono::system_clock::now();
         AIALG_PRINT("Postprocess time %ld us\n",
-                    std::chrono::duration_cast<std::chrono::microseconds>(end_time_post - end_time_run).count());
+            std::chrono::duration_cast<std::chrono::microseconds>(end_time_post - end_time_run).count());
 #endif
     }
 
     void CModule_vit_impl::post_process()
     {
-        int vit_embed_len = data_out_.size() / config_.batch_size;
-        // AIALG_PRINT("hidden_size_ : %d\n", hidden_size_);
-        int token_num = vit_embed_len / hidden_size_;
-        for (int bs = 0; bs < config_.batch_size; ++bs)
-        {
-            float* vit_embed = data_out_.data() + bs * vit_embed_len;
-            segment_batch_[bs].probs = vit_embed;
-            segment_batch_[bs].height = token_num;
-            segment_batch_[bs].width = hidden_size_;
-        }
+
     }
 
-    const SegmentResult* CModule_vit_impl::get_result()
+    const NetFloatTensor* CModule_vit_impl::get_result() const
     {
-        return segment_batch_.data();
+        return &data_out_gpu_tensor_;
     }
 
     const BaseConfig* CModule_vit_impl::get_config() const

@@ -7,7 +7,7 @@
     },
     "configurePresets": [
         {
-            "name": "Build_Release_Linux",
+            "name": "Build_Release_Linux_Python311",
             "generator": "Unix Makefiles",
             "binaryDir": "${sourceDir}/build/${presetName}",
             "cacheVariables": {
@@ -16,17 +16,17 @@
                 "CMAKE_CXX_FLAGS": "-Wl,--warn-unresolved-symbols",
                 "TRT_HOME":"/mnt/d/codes/third_party/Linux/TensorRT-10.5.0.18",
                 "OpenCV_DIR":"/mnt/d/codes/third_party/Linux/OpenCV455",
-                "MOT_PYTHON_LIB":"ON",
+                "LIBTORCH_DIR":"/mnt/d/codes/third_party/Linux/libtorch",
+                "PYTHON_API":"ON",
                 "JAVA_API":"ON",
-                "ALG_NAME_LOWER":"vit",
-                "PYTHON_EXECUTABLE":"/home/jnulzl/Softwares/anaconda3/bin/python3.9"
+                "PYTHON_EXECUTABLE":"/home/jnulzl/miniconda3/envs/python311/bin/python"
             }
         },
         {
-            "name": "Build_Debug_Linux",
-            "inherits": "Build_Release_Linux",
+            "name": "Build_Release_Linux",
+            "inherits": "Build_Release_Linux_Python311",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
+                "PYTHON_API": "OFF"
             }
         }
     ]

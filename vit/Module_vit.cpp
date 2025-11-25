@@ -9,13 +9,13 @@ namespace tensorrt_vit
 {
     CModule_vit::~CModule_vit()
     {
-        if(ANY_POINTER_CAST(impl_, CModule_vit_impl))
+        if (ANY_POINTER_CAST(impl_, CModule_vit_impl))
         {
             delete ANY_POINTER_CAST(impl_, CModule_vit_impl);
         }
     }
 
-    void CModule_vit::init(const BaseConfig &config)
+    void CModule_vit::init(const BaseConfig& config)
     {
         print_version();
         ANY_POINTER_CAST(impl_, CModule_vit_impl)->init(config);
@@ -29,12 +29,12 @@ namespace tensorrt_vit
 #endif
     }
 
-    void CModule_vit::process_batch(const ImageInfoUint8 *imageInfos, int batch_size)
+    void CModule_vit::process_batch(const ImageInfoUint8* imageInfos, int batch_size)
     {
         ANY_POINTER_CAST(impl_, CModule_vit_impl)->process_batch(imageInfos, batch_size);
     }
 
-    const SegmentResult* CModule_vit::get_result()
+    const NetFloatTensor* CModule_vit::get_result() const
     {
         return ANY_POINTER_CAST(impl_, CModule_vit_impl)->get_result();
     }

@@ -6,6 +6,9 @@
 #define AI_ALG_DEBUG_H
 
 #include <chrono>
-//#define AI_ALG_DEBUG
+
+#ifndef USE_PYTHON_API
+#define AI_ALG_DEBUG
+#endif
 
 #endif //AI_ALG_DEBUG_H

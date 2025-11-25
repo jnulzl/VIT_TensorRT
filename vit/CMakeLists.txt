@@ -60,3 +60,5 @@ if(USE_CUDA)
             nppial
             )
 endif()
+
+add_subdirectory(python)
