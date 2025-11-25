@@ -74,7 +74,7 @@ namespace tensorrt_vit
     void CModule_vit_impl::post_process()
     {
         int vit_embed_len = data_out_.size() / config_.batch_size;
-        AIALG_PRINT("hidden_size_ : %d\n", hidden_size_);
+        // AIALG_PRINT("hidden_size_ : %d\n", hidden_size_);
         int token_num = vit_embed_len / hidden_size_;
         for (int bs = 0; bs < config_.batch_size; ++bs)
         {
