@@ -14,7 +14,7 @@
                 "CMAKE_BUILD_TYPE": "Release",
                 "CMAKE_EXPORT_COMPILE_COMMANDS": "YES",
                 "CMAKE_CXX_FLAGS": "-Wl,--warn-unresolved-symbols",
-                "TRT_HOME":"/mnt/d/codes/third_party/Linux/TensorRT-10.5.0.18",
+                "TRT_HOME":"/mnt/d/codes/third_party/Linux/TensorRT-10.5.0.18.Linux.x86_64-gnu.cuda-11.8",
                 "OpenCV_DIR":"/mnt/d/codes/third_party/Linux/OpenCV455",
                 "LIBTORCH_DIR":"/mnt/d/codes/third_party/Linux/libtorch",
                 "PYTHON_API":"ON",

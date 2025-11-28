@@ -129,6 +129,21 @@ namespace tensorrt_vit
                 AIALG_ASSERT(0);
             }
 
+            // 只适合单输入
+            // ITensor* input = network_->getInput(0);
+            // auto inputName = input->getName();
+            const char* inputName = network_->getInput(0)->getName();
+
+            // 强制修改 ONNX 输入为动态维度（若 ONNX 原本已是动态则可略）
+            // input->setDimensions(Dims4{-1, 1, -1, -1});  // (B, 1, H, W)
+
+            // Create optimization profile
+            IOptimizationProfile* profile = builder_->createOptimizationProfile();
+            profile->setDimensions(inputName, OptProfileSelector::kMIN, Dims4{1,  3, 448, 448});
+            profile->setDimensions(inputName, OptProfileSelector::kOPT, Dims4{8,  3, 448, 448});
+            profile->setDimensions(inputName, OptProfileSelector::kMAX, Dims4{16, 3, 448, 448});
+            config_trt_->addOptimizationProfile(profile);
+
 #if NV_TENSORRT_MAJOR >= 8
             // CUDA stream used for profiling by the builder.
             auto profileStream = samplesCommon::makeCudaStream();
@@ -191,21 +206,20 @@ namespace tensorrt_vit
 #endif
             }
         }
-        assert(network_->getNbInputs() == config_.input_names.size());
-        //    mInputDims = network->getInput(0)->getDimensions();
-        //    assert(mInputDims.nbDims == 4);
 
-        assert(network_->getNbOutputs() == config_.output_names.size());
-        //    mOutputDims = network->getOutput(0)->getDimensions();
-        //    assert(mOutputDims.nbDims == 2);
-
-                // Create RAII buffer manager object
-        buffers_ = std::make_unique<samplesCommon::BufferManager>(net_, config_.batch_size);
         context_ = TRTUniquePtr<nvinfer1::IExecutionContext>(net_->createExecutionContext());
         if (!context_)
         {
             AIALG_ASSERT(0);
         }
+
+         // 动态设置 shape
+        context_->setInputShape(config_.input_names[0].c_str(), 
+                                                Dims4{config_.batch_size, config_.net_inp_channels,
+                                                 config_.net_inp_height, config_.net_inp_width});
+
+        // Create RAII buffer manager object(!!!!must after context_->setInputShape!!!!)
+        buffers_ = std::make_unique<samplesCommon::BufferManager>(net_, config_.batch_size, context_.get());
 
         // For gpu preprocess
         /************Device memory allocator and initialization***********/
@@ -471,7 +485,7 @@ namespace tensorrt_vit
 #endif
 
         auto mOutputDims = net_->getTensorShape(config_.output_names[0].c_str());
-        data_out_gpu_tensor_.batch = mOutputDims.d[0]; // batch_size
+        data_out_gpu_tensor_.batch = config_.batch_size; // batch_size for supported dynamic batch
         data_out_gpu_tensor_.channels = mOutputDims.d[1]; // token_num
         data_out_gpu_tensor_.height = mOutputDims.d[2]; // hidden_size
 
