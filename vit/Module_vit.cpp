@@ -34,6 +34,11 @@ namespace tensorrt_vit
         ANY_POINTER_CAST(impl_, CModule_vit_impl)->process_batch(imageInfos, batch_size);
     }
 
+    void CModule_vit::process_batch(const NetFloatTensor* floatTensor)
+    {
+        ANY_POINTER_CAST(impl_, CModule_vit_impl)->process_batch(floatTensor);
+    }
+
     const NetFloatTensor* CModule_vit::get_result() const
     {
         return ANY_POINTER_CAST(impl_, CModule_vit_impl)->get_result();

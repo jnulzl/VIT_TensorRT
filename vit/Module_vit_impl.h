@@ -21,12 +21,16 @@ namespace tensorrt_vit
 
         void process_batch(const ImageInfoUint8* imageInfos, int batch_size);
 
+        void process_batch(const NetFloatTensor* floatTensor);
+
         const NetFloatTensor* get_result() const;
 
         const BaseConfig* get_config() const;
 
     protected:
         virtual void pre_batch_process(const ImageInfoUint8* imageInfos, int batch_size);
+
+        virtual void pre_batch_process(const NetFloatTensor* floatTensor);
 
         virtual void post_process();
 
@@ -38,7 +42,7 @@ namespace tensorrt_vit
 
     protected:
         BaseConfig config_;
-        NetFloatTensor data_out_gpu_tensor_{};
+        std::vector<NetFloatTensor> data_out_gpu_tensors_{};
 
         std::vector<float> data_out_;
         std::vector<int> frame_ids_;

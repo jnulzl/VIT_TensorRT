@@ -21,6 +21,8 @@ namespace tensorrt_vit
 
         void process_batch(const ImageInfoUint8* imageInfos, int batch_size);
 
+        void process_batch(const NetFloatTensor* floatTensor);
+
         const NetFloatTensor* get_result() const;
 
         const BaseConfig* get_config() const;

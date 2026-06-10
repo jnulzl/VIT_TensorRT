@@ -34,6 +34,8 @@ namespace tensorrt_vit
 
         virtual void pre_batch_process(const ImageInfoUint8 *imageInfos, int batch_size) override;
 
+        virtual void pre_batch_process(const NetFloatTensor* floatTensor) override;
+
         void pre_process_gpu(const ImageInfoUint8 *imageInfoUint8, int batch_id = 0);
 
     private:

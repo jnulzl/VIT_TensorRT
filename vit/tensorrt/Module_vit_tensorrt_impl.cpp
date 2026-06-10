@@ -139,9 +139,9 @@ namespace tensorrt_vit
 
             // Create optimization profile
             IOptimizationProfile* profile = builder_->createOptimizationProfile();
-            profile->setDimensions(inputName, OptProfileSelector::kMIN, Dims4{1,  3, 448, 448});
-            profile->setDimensions(inputName, OptProfileSelector::kOPT, Dims4{8,  3, 448, 448});
-            profile->setDimensions(inputName, OptProfileSelector::kMAX, Dims4{16, 3, 448, 448});
+            profile->setDimensions(inputName, OptProfileSelector::kMIN, Dims4{1,  3, 518, 518});
+            profile->setDimensions(inputName, OptProfileSelector::kOPT, Dims4{32,  3, 518, 518});
+            profile->setDimensions(inputName, OptProfileSelector::kMAX, Dims4{64, 3, 518, 518});
             config_trt_->addOptimizationProfile(profile);
 
 #if NV_TENSORRT_MAJOR >= 8
@@ -325,15 +325,15 @@ namespace tensorrt_vit
         //                                       img_after_warpAffine_data.data());
         //cv::imwrite("aaaaaaaaaaaa.jpg", img_after_warpAffine);
 
-        if (0 == config_.model_include_preprocess)
-        {
-            /**********************bgr2rgb*************************/
-            const int aDstOrder[3] = { 2, 1, 0 };
-            nppiSwapChannels_8u_C3IR(dst_ptr_d_ + bs * dst_pixel_num_,
-                sizeof(Npp8u) * config_.net_inp_width * config_.net_inp_channels,
-                { config_.net_inp_width, config_.net_inp_height },
-                aDstOrder);
-        }
+        // if (0 == config_.model_include_preprocess)
+        // {
+        //     /**********************bgr2rgb*************************/
+        //     const int aDstOrder[3] = { 2, 1, 0 };
+        //     nppiSwapChannels_8u_C3IR(dst_ptr_d_ + bs * dst_pixel_num_,
+        //         sizeof(Npp8u) * config_.net_inp_width * config_.net_inp_channels,
+        //         { config_.net_inp_width, config_.net_inp_height },
+        //         aDstOrder);
+        // }
         /**********************uint8 -> float*****************/
         nppiConvert_8u32f_C3R(dst_ptr_d_ + bs * dst_pixel_num_,
             sizeof(Npp8u) * config_.net_inp_width * config_.net_inp_channels,
@@ -459,6 +459,15 @@ namespace tensorrt_vit
         }
     }
 
+    void CModule_vit_tensorrt_impl::pre_batch_process(const NetFloatTensor* floatTensor)
+    {
+            //pre_batch_process gpu version for preprocessed data, just copy to net input buffer
+            float* net_input_buffer_d = reinterpret_cast<float*>(buffers_->getDeviceBuffer(config_.input_names[0]));
+            CUDACHECK(cudaMemcpy(net_input_buffer_d, floatTensor->data,
+                sizeof(float) * floatTensor->batch * floatTensor->channels * floatTensor->height * floatTensor->width,
+                cudaMemcpyDeviceToDevice));
+    }
+
     void CModule_vit_tensorrt_impl::engine_run()
     {
 #ifdef AI_ALG_DEBUG
@@ -477,17 +486,29 @@ namespace tensorrt_vit
         begin_time = std::chrono::system_clock::now();
 #endif
 
+        size_t output_size = config_.output_names.size();
 #ifdef USE_PYTHON_API
-        data_out_gpu_tensor_.data = static_cast<float*>(buffers_->getDeviceBuffer(config_.output_names[0])); // 0 is the only output
+        data_out_gpu_tensors_.resize(output_size);
+        for (size_t idx = 0; idx < output_size; ++idx)
+        {
+            data_out_gpu_tensors_[idx].data = static_cast<float*>(buffers_->getDeviceBuffer(config_.output_names[idx]));
+        }
 #else
         buffers_->copyOutputToHost();
-        data_out_gpu_tensor_.data = static_cast<float*>(buffers_->getHostBuffer(config_.output_names[0])); // 0 is the only output        
+        data_out_gpu_tensors_.resize(output_size);
+        for (size_t idx = 0; idx < output_size; ++idx)
+        {
+            data_out_gpu_tensors_[idx].data = static_cast<float*>(buffers_->getHostBuffer(config_.output_names[idx]));
+        }
 #endif
 
-        auto mOutputDims = net_->getTensorShape(config_.output_names[0].c_str());
-        data_out_gpu_tensor_.batch = config_.batch_size; // batch_size for supported dynamic batch
-        data_out_gpu_tensor_.channels = mOutputDims.d[1]; // token_num
-        data_out_gpu_tensor_.height = mOutputDims.d[2]; // hidden_size
+        for (size_t idx = 0; idx < output_size; ++idx)
+        {
+            auto mOutputDims = net_->getTensorShape(config_.output_names[idx].c_str());
+            data_out_gpu_tensors_[idx].batch = config_.batch_size; // batch_size for supported dynamic batch
+            data_out_gpu_tensors_[idx].channels = mOutputDims.d[1]; // token_num
+            data_out_gpu_tensors_[idx].height = mOutputDims.d[2]; // hidden_size
+        }
 
 #ifdef AI_ALG_DEBUG
         end_time = std::chrono::system_clock::now();

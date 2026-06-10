@@ -32,7 +32,11 @@ namespace tensorrt_vit
         //pre_batch_process cpu version
     }
 
-
+    void CModule_vit_impl::pre_batch_process(const NetFloatTensor* floatTensor)
+    {
+        //pre_batch_process cpu version
+    }
+    
     void CModule_vit_impl::process_batch(const ImageInfoUint8* imageInfos, int batch_size)
     {
         //TODO : check if batch_size == config_.batch_size
@@ -70,6 +74,37 @@ namespace tensorrt_vit
 #endif
     }
 
+    void CModule_vit_impl::process_batch(const NetFloatTensor* floatTensor)
+    {
+#ifdef AI_ALG_DEBUG
+        std::chrono::time_point<std::chrono::system_clock> begin_time = std::chrono::system_clock::now();
+#endif
+
+        pre_batch_process(floatTensor);
+
+#ifdef AI_ALG_DEBUG
+        std::chrono::time_point<std::chrono::system_clock> end_time = std::chrono::system_clock::now();
+        AIALG_PRINT("Preprocess time %ld us\n",
+            std::chrono::duration_cast<std::chrono::microseconds>(end_time - begin_time).count());
+#endif
+
+        engine_run();
+
+#ifdef AI_ALG_DEBUG
+        std::chrono::time_point<std::chrono::system_clock> end_time_run = std::chrono::system_clock::now();
+        AIALG_PRINT("Inference time %ld us\n",
+            std::chrono::duration_cast<std::chrono::microseconds>(end_time_run - end_time).count());
+#endif
+
+        post_process();
+
+#ifdef AI_ALG_DEBUG
+        std::chrono::time_point<std::chrono::system_clock> end_time_post = std::chrono::system_clock::now();
+        AIALG_PRINT("Postprocess time %ld us\n",
+            std::chrono::duration_cast<std::chrono::microseconds>(end_time_post - end_time_run).count());
+#endif
+    }
+
     void CModule_vit_impl::post_process()
     {
 
@@ -77,7 +112,7 @@ namespace tensorrt_vit
 
     const NetFloatTensor* CModule_vit_impl::get_result() const
     {
-        return &data_out_gpu_tensor_;
+        return data_out_gpu_tensors_.data(); // for supported multiple output, return the pointer of the first output, user can get other output from data_out_gpu_tensors_
     }
 
     const BaseConfig* CModule_vit_impl::get_config() const
