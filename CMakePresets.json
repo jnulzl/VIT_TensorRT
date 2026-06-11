@@ -14,11 +14,14 @@
                 "CMAKE_BUILD_TYPE": "Release",
                 "CMAKE_EXPORT_COMPILE_COMMANDS": "YES",
                 "CMAKE_CXX_FLAGS": "-Wl,--warn-unresolved-symbols",
-                "TRT_HOME":"/mnt/d/codes/third_party/Linux/TensorRT-10.5.0.18.Linux.x86_64-gnu.cuda-11.8",
-                "OpenCV_DIR":"/mnt/d/codes/third_party/Linux/OpenCV455",
-                "LIBTORCH_DIR":"/mnt/d/codes/third_party/Linux/libtorch-cxx11-abi-shared-with-deps-2.5.1+cu118",
+                "CUDA_HOME":"/usr/local/cuda-12.8",
+                "TRT_HOME":"/mnt/data/jnulzl/Softwares/TensorRT-10.16.0.72.Linux.x86_64-gnu.cuda-12.9",
+                "TRT_SRC_HOME":"/mnt/data/jnulzl/Softwares/TensorRT-src",
+                "OpenCV_DIR":"/mnt/data/jnulzl/Softwares/opencv455",
+                "LIBTORCH_DIR":"/mnt/data/jnulzl/Softwares/libtorch",
+                "PYBIND11_ROOT":"/mnt/data/jnulzl/Softwares/pybind11-2.12.0",
                 "PYTHON_API":"ON",
-                "PYTHON_EXECUTABLE":"/home/jnulzl/miniconda3/envs/python311/bin/python"
+                "PYTHON_EXECUTABLE":"/mnt/data/jnulzl/miniconda3/envs/py311/bin/python"
             }
         },
         {

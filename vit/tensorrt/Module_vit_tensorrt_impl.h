@@ -41,7 +41,7 @@ namespace tensorrt_vit
     private:
 
         template<typename T>
-        using TRTUniquePtr = std::unique_ptr<T, samplesCommon::InferDeleter>;
+        using TRTUniquePtr = std::unique_ptr<T>;
 
         //!
         //! \brief Parses an ONNX model and creates a TensorRT network

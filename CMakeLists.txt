@@ -70,13 +70,14 @@ if("Linux" STREQUAL ${CMAKE_SYSTEM_NAME})
     endif()
     message(STATUS "TRT_HOME :  " ${TRT_HOME})
 
-    set(TRT_SAMPLES_HOME ${TRT_HOME}/samples)
+    set(TRT_SAMPLES_HOME ${TRT_SRC_HOME}/samples)
     set(TRT_SAMPLES_COMMON_HOME ${TRT_SAMPLES_HOME}/common)
 
     ##############TensorRT##############
     set(TENSORRT_INCLUDE
         ${TRT_SAMPLES_COMMON_HOME}
         ${TRT_SAMPLES_HOME}
+        ${TRT_SRC_HOME}/shared
         ${TRT_HOME}/include
         ${CUDA_HOME}/include
         ${CUDNN_HOME}/include

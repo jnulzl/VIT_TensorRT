@@ -1,6 +1,6 @@
 
 if(PYTHON_API)
-        add_subdirectory(${PROJECT_SOURCE_DIR}/../third_party/pybind11-2.12.0 build)
+        add_subdirectory(${PYBIND11_ROOT} build)
 
         file(GLOB _tmp ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
         set(src_for_python ${src_for_python} ${_tmp})

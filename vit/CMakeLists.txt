@@ -4,8 +4,6 @@ set(src_all ${src_all} ${_tmp})
 if(USE_${ENGINE_UPPER})
     file(GLOB _tmp ${CMAKE_CURRENT_SOURCE_DIR}/${ENGINE_LOWER}/*.cpp)
     set(src_all ${src_all} ${_tmp})
-#    file(GLOB _tmp ${CMAKE_CURRENT_SOURCE_DIR}/${ENGINE_LOWER}/*.cu)
-#    set(src_all ${src_all} ${_tmp})
 endif()
 
 if(USE_TENSORRT)

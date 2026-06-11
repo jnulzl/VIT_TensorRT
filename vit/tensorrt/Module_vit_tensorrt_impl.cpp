@@ -89,9 +89,7 @@ namespace tensorrt_vit
                 runtime_->setDLACore(config_.dlaCore);
             }
 
-            net_ = std::shared_ptr<nvinfer1::ICudaEngine>(
-                runtime_->deserializeCudaEngine(engineData.data(), engineData.size()),
-                samplesCommon::InferDeleter());
+            net_ = std::shared_ptr<nvinfer1::ICudaEngine>(runtime_->deserializeCudaEngine(engineData.data(), engineData.size()));
         }
         else
         {
@@ -167,15 +165,13 @@ namespace tensorrt_vit
 
             runtime_->setEngineHostCodeAllowed(true);
 
-            net_ = std::shared_ptr<nvinfer1::ICudaEngine>(
-                runtime_->deserializeCudaEngine(plan->data(), plan->size()), samplesCommon::InferDeleter());
+            net_ = std::shared_ptr<nvinfer1::ICudaEngine>(runtime_->deserializeCudaEngine(plan->data(), plan->size()));
             if (!net_)
             {
                 AIALG_ASSERT(0);
             }
 #else
-            net_ = std::shared_ptr<nvinfer1::ICudaEngine>(
-                builder_->buildEngineWithConfig(*network_, *config_trt_), samplesCommon::InferDeleter());
+            net_ = std::shared_ptr<nvinfer1::ICudaEngine>(builder_->buildEngineWithConfig(*network_, *config_trt_));
 
             if (!net_)
             {
