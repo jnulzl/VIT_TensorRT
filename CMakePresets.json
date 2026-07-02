@@ -25,6 +25,20 @@
             }
         },
         {
+            "name": "Build_Release_Linux_Python312",
+            "inherits": "Build_Release_Linux_Python311",
+            "cacheVariables": {
+                "PYTHON_EXECUTABLE":"/mnt/data/jnulzl/miniconda3/envs/py312/bin/python"
+            }
+        },
+        {
+            "name": "Build_Release_Linux_Python310",
+            "inherits": "Build_Release_Linux_Python311",
+            "cacheVariables": {
+                "PYTHON_EXECUTABLE":"/mnt/data/jnulzl/miniconda3/envs/py310/bin/python"
+            }
+        },
+        {
             "name": "Build_Release_Linux",
             "inherits": "Build_Release_Linux_Python311",
             "cacheVariables": {
