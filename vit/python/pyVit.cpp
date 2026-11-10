@@ -19,12 +19,12 @@
 
 namespace py = pybind11;
 
-class PyVit
+class PyVitTianMu
 {
 public:
-    PyVit() = default;
+    PyVitTianMu() = default;
 
-    ~PyVit() = default;
+    ~PyVitTianMu() = default;
 
     void init(const BaseConfig& config)
     {
@@ -164,7 +164,7 @@ public:
         for (size_t idx = 0; idx < obj_.get_config()->output_names.size(); ++idx)
         {
             const NetFloatTensor& tensor = res[idx];
-            std::vector<int64_t> sizes = { tensor.batch, tensor.channels, tensor.height };
+            std::vector<int64_t> sizes = { tensor.batch, tensor.channels, tensor.height, tensor.width };
 
             // 1. 显式在 GPU 上直接分配一块属于 PyTorch 原生的干净连续显存
             // 通过这种方式创建出来的 Tensor 具备一切合法的元数据修改权限，后续绝不会触发 set_stride 限制
@@ -238,13 +238,13 @@ PYBIND11_MODULE(MODEL_NAME, m)
         .def_readwrite("model_include_preprocess", &BaseConfig::model_include_preprocess)
         ;
 
-    py::class_<PyVit>(m, "PyVit")
+    py::class_<PyVitTianMu>(m, "PyVitTianMu")
         .def(py::init())
-        .def("init", &PyVit::init)
-        .def("deinit", &PyVit::deinit)
-        .def("process", &PyVit::process)
-        .def("process_with_tensor", &PyVit::process_with_tensor)
-        .def("process_with_pretensor", &PyVit::process_with_pretensor)
-        .def("get_result", &PyVit::get_result);
+        .def("init", &PyVitTianMu::init)
+        .def("deinit", &PyVitTianMu::deinit)
+        .def("process", &PyVitTianMu::process)
+        .def("process_with_tensor", &PyVitTianMu::process_with_tensor)
+        .def("process_with_pretensor", &PyVitTianMu::process_with_pretensor)
+        .def("get_result", &PyVitTianMu::get_result);
 
 }

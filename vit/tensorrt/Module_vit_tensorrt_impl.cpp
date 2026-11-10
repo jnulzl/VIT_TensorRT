@@ -137,9 +137,9 @@ namespace tensorrt_vit
 
             // Create optimization profile
             IOptimizationProfile* profile = builder_->createOptimizationProfile();
-            profile->setDimensions(inputName, OptProfileSelector::kMIN, Dims4{1,  3, 518, 518});
-            profile->setDimensions(inputName, OptProfileSelector::kOPT, Dims4{32,  3, 518, 518});
-            profile->setDimensions(inputName, OptProfileSelector::kMAX, Dims4{64, 3, 518, 518});
+            profile->setDimensions(inputName, OptProfileSelector::kMIN, Dims4{8,  3, 448, 448});
+            profile->setDimensions(inputName, OptProfileSelector::kOPT, Dims4{16, 3, 688, 448});
+            profile->setDimensions(inputName, OptProfileSelector::kMAX, Dims4{32, 3, 688, 688});
             config_trt_->addOptimizationProfile(profile);
 
 #if NV_TENSORRT_MAJOR >= 8
@@ -504,6 +504,7 @@ namespace tensorrt_vit
             data_out_gpu_tensors_[idx].batch = config_.batch_size; // batch_size for supported dynamic batch
             data_out_gpu_tensors_[idx].channels = mOutputDims.d[1]; // token_num
             data_out_gpu_tensors_[idx].height = mOutputDims.d[2]; // hidden_size
+            data_out_gpu_tensors_[idx].width = mOutputDims.d[3]; // 
         }
 
 #ifdef AI_ALG_DEBUG
