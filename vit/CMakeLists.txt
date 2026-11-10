@@ -12,7 +12,7 @@ endif()
 
 if (BUILD_SHARED_LIBS)
     add_library(${VIT_LIB_NAME} SHARED ${src_all})
-    set_target_properties(${VIT_LIB_NAME} PROPERTIES VERSION ${LIB_MAJOR_VERSION}.${LIB_MINOR_VERSION}.${GIT_HASH} SOVERSION ${LIB_MAJOR_VERSION})
+    set_target_properties(${VIT_LIB_NAME} PROPERTIES VERSION ${LIB_MAJOR_VERSION}.${GIT_BRANCH}.${GIT_HASH} SOVERSION ${LIB_MAJOR_VERSION})
 else()
     set(src_all ${src_all})
     add_library(${VIT_LIB_NAME} STATIC ${src_all})

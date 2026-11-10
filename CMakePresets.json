@@ -15,7 +15,7 @@
                 "CMAKE_EXPORT_COMPILE_COMMANDS": "YES",
                 "CMAKE_CXX_FLAGS": "-Wl,--warn-unresolved-symbols",
                 "CUDA_HOME":"/usr/local/cuda-12.8",
-                "TRT_HOME":"/mnt/data/jnulzl/Softwares/TensorRT-10.16.0.72.Linux.x86_64-gnu.cuda-12.9",
+                "TRT_HOME":"/mnt/data/jnulzl/Softwares/TensorRT-10.16.1.11.Linux.x86_64-gnu.cuda-12.9",
                 "TRT_SRC_HOME":"/mnt/data/jnulzl/Softwares/TensorRT-src",
                 "OpenCV_DIR":"/mnt/data/jnulzl/Softwares/opencv455",
                 "LIBTORCH_DIR":"/mnt/data/jnulzl/Softwares/libtorch",
