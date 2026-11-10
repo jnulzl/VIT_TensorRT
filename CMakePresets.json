@@ -14,12 +14,20 @@
                 "CMAKE_BUILD_TYPE": "Release",
                 "CMAKE_EXPORT_COMPILE_COMMANDS": "YES",
                 "CMAKE_CXX_FLAGS": "-Wl,--warn-unresolved-symbols",
-                "TRT_HOME":"/mnt/d/codes/third_party/Linux/TensorRT-10.5.0.18.Linux.x86_64-gnu.cuda-11.8",
+                "CUDA_HOME":"/mnt/d/codes/third_party/Linux/cuda-12.8",
+                "TRT_HOME":"/mnt/d/codes/third_party/Linux/TensorRT-10.10.0.31.Linux.x86_64-gnu.cuda-12.9",
                 "OpenCV_DIR":"/mnt/d/codes/third_party/Linux/OpenCV455",
-                "LIBTORCH_DIR":"/mnt/d/codes/third_party/Linux/libtorch",
+                "LIBTORCH_DIR":"/mnt/d/codes/third_party/Linux/libtorch-shared-with-deps-2.10.0+cu126",
                 "PYTHON_API":"ON",
                 "JAVA_API":"ON",
                 "PYTHON_EXECUTABLE":"/home/jnulzl/miniconda3/envs/python311/bin/python"
+            }
+        },
+        {
+            "name": "Build_Release_Linux_Python312",
+            "inherits": "Build_Release_Linux_Python311",
+            "cacheVariables": {
+                "PYTHON_EXECUTABLE":"/home/jnulzl/miniconda3/envs/python312/bin/python"
             }
         },
         {
